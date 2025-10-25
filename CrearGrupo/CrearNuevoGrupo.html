@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear Nuevo Grupo</title>
+    <link rel="stylesheet" href="CrearNuevoGrupo.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Crear Nuevo Grupo</h1>
+        <p class="subtitle">Ciclo Escolar Activo: [2025-2026]</p>
+      </header>
+
+      <form class="group-details">
+        <div class="form-field">
+          <label for="group-name">Nombre del grupo</label>
+          <input type="text" id="group-name" placeholder="Ej: 1A" />
+        </div>
+        <div class="form-field">
+          <label for="turno">Turno</label>
+          <select id="turno">
+            <option value="matutino">Matutino</option>
+            <option value="vespertino">Vespertino</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="semestre">Semestre</label>
+          <select id="semestre">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+
+
+        <!-- <div class="form-field">
+          <label for="carrera">Carrera</label>
+          <select id="carrera">
+            <option value="tronco-comun">Tronco Común</option>
+            <option value="Fisico">Fisico</option>
+            <option value="Quimico">Quimico</option>
+            <option value="Comunicador">Comunicador</option>
+            <option value="Logistica">Logistica</option>
+          </select>
+        </div> -->
+
+          <div class="form-field">
+          <label for="carrera">Carrera</label>
+          <select id="carrera"></select>
+        </div>
+      <!-- </form> -->
+
+
+
+
+
+
+        <div class="form-field">
+          <label for="area-propedeutica">Área Propedéutica</label>
+          <select id="area-propedeutica"></select>
+        </div>
+      </form>
+
+      <hr />
+
+      <main class="main-content">
+        <div class="materials-section">
+          <h2>Lista de materias</h2>
+          <ul class="materials-list">
+            <li><span class="material-icons">add_circle</span> Algebra</li>
+            <li><span class="material-icons">add_circle</span> Calculo</li>
+            <li><span class="material-icons">add_circle</span> Logica</li>
+            <li><span class="material-icons">add_circle</span> Literatura I</li>
+          </ul>
+        </div>
+
+        <div class="schedule-section">
+          <h2>Horario</h2>
+          <table class="schedule-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
+                <th>Sábado</th>
+                <th>Domingo</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </main>
+
+      <footer class="form-actions">
+        <button class="btn btn-primary" id="confirm-btn">Crear grupo</button>
+        <button class="btn btn-secondary">Cancelar</button>
+      </footer>
+    </div>
+
+    <div id="modal-container"></div>
+
+    <script src="CrearNuevoGrupo.js"></script>
+  </body>
+</html>

@@ -1,0 +1,141 @@
+/* Estilos para la ventana modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 0;
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.modal-header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 1rem 1.5rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    font-size: 1rem;
+}
+
+input[disabled] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.horario-adder {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.horario-adder select { width: 40%; }
+.horario-adder input { width: 25%; }
+
+.add-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding-bottom: 4px;
+}
+
+.horarios-list-table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+}
+
+.horarios-list-table th, .horarios-list-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.horarios-list-table th {
+    background-color: #f8f9fa;
+}
+
+.horarios-list-table .delete-horario-btn {
+    cursor: pointer;
+    color: #dc3545;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    gap: 1rem;
+}
+
+/* Estilo para celda del horario principal ocupada */
+.schedule-table .class-scheduled {
+    background-color: #0d6efd;
+    color: white;
+    font-size: 0.8rem;
+    padding: 4px;
+    text-align: left;
+    vertical-align: top;
+    cursor: default;
+}
+.schedule-table .class-scheduled:hover {
+    background-color: #0b5ed7;
+}

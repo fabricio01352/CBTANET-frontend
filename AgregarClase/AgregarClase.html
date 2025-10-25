@@ -1,0 +1,61 @@
+<div id="addClassModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Agregar clase</h2>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="modal-materia">Nombre de materia</label>
+                <input type="text" id="modal-materia-name" disabled>
+            </div>
+            <div class="form-group">
+                <label>Horarios</label>
+                <div class="horario-adder">
+                    <select id="horario-dia">
+                        <option value="0">Lunes</option>
+                        <option value="1">Martes</option>
+                        <option value="2">Miércoles</option>
+                        <option value="3">Jueves</option>
+                        <option value="4">Viernes</option>
+                        <option value="5">Sábado</option>
+                        <option value="6">Domingo</option>
+                    </select>
+                    <input type="time" id="horario-inicio" value="07:00">
+                    <input type="time" id="horario-fin" value="08:00">
+                    <button id="add-horario-btn" class="add-btn">+</button>
+                </div>
+                <table class="horarios-list-table">
+                    <thead>
+                        <tr>
+                            <th>Día. Semana</th>
+                            <th>Hora de Inicio</th>
+                            <th>Hora de Fin</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="horarios-list-body"></tbody>
+                </table>
+            </div>
+            <div class="form-group">
+                <label for="modal-docente">Nombre del docente</label>
+                <select id="modal-docente">
+                    <option>Juan Perez</option>
+                    <option>Maria Rodriguez</option>
+                    <option>Carlos Sanchez</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-aula">Aula</label>
+                <select id="modal-aula">
+                    <option>204av</option>
+                    <option>101</option>
+                    <option>Laboratorio A</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="cancel-btn" class="btn btn-secondary">Cancelar</button>
+            <button id="confirm-btn" class="btn btn-primary">Confirmar</button>
+        </div>
+    </div>
+</div>
