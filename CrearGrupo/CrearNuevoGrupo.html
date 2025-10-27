@@ -12,36 +12,31 @@
   </head>
   <body>
     <div class="container">
-
-
-    <header>
-  <h1>Crear Nuevo Grupo</h1>
-  <p class="subtitle">Cargando ciclo escolar...</p>
-</header>
-      <form class="group-details">
-
-
-
-        <div class="form-field">
-
-<div class="form-group">
-    <label for="group-letter">Letra del grupo</label>
-    <input type="text" id="group-letter" placeholder="Ingresa una letra" maxlength="1">
-</div>
-         <div class="form-group">
-    <label for="group-name">Nota del grupo</label>
-    <input type="text" id="group-name" placeholder="Nota">
-</div>
-
-
-
-
+      <header>
+        <div class="header-content">
+          <img src="../resources/cbtalogo.jpeg" alt="Logo" class="logo" />
+          <div class="header-text">
+            <h1>Crear Nuevo Grupo</h1>
+            <p class="subtitle">Cargando ciclo escolar...</p>
+          </div>
         </div>
-
-
-
-
-
+      </header>
+      <form class="group-details">
+        <div class="form-field">
+          <div class="form-group">
+            <label for="group-letter">Letra del grupo</label>
+            <input
+              type="text"
+              id="group-letter"
+              placeholder="Ingresa una letra"
+              maxlength="1"
+            />
+          </div>
+          <div class="form-group">
+            <label for="group-name">Nota del grupo</label>
+            <input type="text" id="group-name" placeholder="Nota" />
+          </div>
+        </div>
 
         <div class="form-field">
           <label for="turno">Turno</label>
@@ -83,14 +78,12 @@
         <div class="materias-column">
           <div class="materias-container">
             <h3>Materias disponibles</h3>
-            <div id="materias-list" class="materias-list">
-            </div>
+            <div id="materias-list" class="materias-list"></div>
           </div>
 
           <div class="assigned-materias">
             <h3>Materias asignadas al grupo</h3>
-            <ul id="assigned-materials-list" class="materials-list">
-            </ul>
+            <ul id="assigned-materials-list" class="materials-list"></ul>
           </div>
         </div>
 
@@ -111,8 +104,7 @@
                     <!-- <th>Domingo</th> -->
                   </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody></tbody>
               </table>
             </div>
           </div>
@@ -120,7 +112,9 @@
       </main>
 
       <footer class="form-actions">
-        <button class="btn btn-primary" id="create-group-btn">Crear grupo</button>
+        <button class="btn btn-primary" id="create-group-btn">
+          Crear grupo
+        </button>
         <button class="btn btn-secondary" type="button">Cancelar</button>
       </footer>
     </div>

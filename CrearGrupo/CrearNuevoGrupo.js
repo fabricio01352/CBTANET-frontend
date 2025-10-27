@@ -724,12 +724,39 @@ async function validarCreacionGrupo() {
     return;
   }
 
-  const horasRequeridas = 4;
-  const horasAsignadas = horarioCeldas.length / totalMaterias;
-  if (horasAsignadas < horasRequeridas) {
-    alert("Faltan horas semanales por completar en alguna materia.");
-    return;
-  }
+
+
+
+
+
+
+
+
+
+  // const horasRequeridas = 4;
+  // const horasAsignadas = horarioCeldas.length / totalMaterias;
+  // if (horasAsignadas < horasRequeridas) {
+  //   alert("Faltan horas semanales por completar en alguna materia.");
+  //   return;
+  // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   try {
     const clases = obtenerClasesDelHorario();
@@ -775,7 +802,34 @@ async function validarCreacionGrupo() {
       return;
     }
 
+try {
+    const materiasInfo = await Promise.all(
+        clasesValidas.map(async (clase) => {
+            const response = await fetch(`http://localhost:8080/materias/${clase.materiaId}`);
+            if (!response.ok) throw new Error('Error al obtener materia');
+            return await response.json();
+        })
+    );
 
+    for (let i = 0; i < clasesValidas.length; i++) {
+        const clase = clasesValidas[i];
+        const materiaInfo = materiasInfo[i];
+        const horasAsignadas = clase.horarios.length;
+        console.log( materiaInfo.horas_por_semana);
+        if (horasAsignadas < materiaInfo.horasPorSemana) {
+          console.log("entre");
+            alert(`Las horas asignadas (${horasAsignadas}) son menores al mínimo requerido (${materiaInfo.horasPorSemana}) para la materia ${materiaInfo.nombre}`);
+            return;
+        }
+        
+        if (horasAsignadas > materiaInfo.horasPorSemana) {
+            alert(`Las horas asignadas (${horasAsignadas}) exceden el máximo permitido (${materiaInfo.horasPorSemana}) para la materia ${materiaInfo.nombre}`);
+            return;
+        }
+    }
+} catch (error) {
+    console.error('Error al validar horas:', error);
+}
 
     const response = await fetch("http://localhost:8080/grupos", {
       method: "POST",
