@@ -1,4 +1,3 @@
-/* Estilos generales */
 * {
     box-sizing: border-box;
 }
@@ -21,7 +20,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Encabezado */
 header h1 {
     margin: 0;
     font-size: 2rem;
@@ -35,7 +33,6 @@ header .subtitle {
     font-size: 1.1rem;
 }
 
-/* Formulario superior */
 .group-details {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -80,7 +77,6 @@ hr {
     margin: 2rem 0;
 }
 
-/* Contenido principal */
 .main-content {
     display: flex;
     flex-direction: column;
@@ -98,7 +94,6 @@ hr {
     font-weight: 600;
 }
 
-/* Contenedor para agregar materias */
 .add-materia-container {
     display: flex;
     gap: 1rem;
@@ -115,7 +110,6 @@ hr {
     font-size: 1rem;
 }
 
-/* Lista de materias */
 .materials-list {
     list-style: none;
     padding: 0;
@@ -234,7 +228,6 @@ hr {
     background-color: #e9ecef;
 }
 
-/* Celda con clase asignada */
 .schedule-table .class-scheduled {
     background-color: #0d6efd;
     color: white;
@@ -339,5 +332,143 @@ hr {
     .schedule-table td {
         padding: 0.25rem;
         height: 50px;
+    }
+}
+
+
+
+
+
+.materias-container {
+    margin-bottom: 20px;
+}
+
+.materias-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.materia-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.materia-item:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+}
+
+.materia-item:active {
+    background: #007bff;
+    color: white;
+}
+
+.main-container {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.materias-column {
+    flex: 0 0 300px; 
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.horario-column {
+    flex: 1; 
+    min-width: 0;
+}
+
+.materias-container {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-height: 400px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.materias-container h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.materias-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.materia-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.materia-item:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    transform: translateY(-1px);
+}
+
+.materia-item:active {
+    background: #007bff;
+    color: white;
+}
+
+.assigned-materias {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.assigned-materias h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.schedule-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.schedule-table {
+    width: 100%;
+    min-width: 600px; 
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .materias-column {
+        flex: none;
+        width: 100%;
     }
 }

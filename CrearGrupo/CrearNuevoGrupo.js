@@ -16,11 +16,10 @@ async function cargarDocentes(materiaId) {
       return;
     }
     
-    // Limpiar y llenar el dropdown
     select.innerHTML = '<option value="">Selecciona un docente</option>';
     data.forEach((d) => {
       const option = document.createElement("option");
-      option.value = d.id; // Asegúrate que esta propiedad es correcta
+      option.value = d.id; 
       option.textContent = d.nombre;
       select.appendChild(option);
     });
@@ -44,7 +43,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const startTime = 7;
   const endTime = 14;
 
-  // --- Generar horario dinámico ---
   for (let hour = startTime; hour <= endTime; hour++) {
     const row = document.createElement("tr");
     const timeHeaderCell = document.createElement("th");
@@ -60,7 +58,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     scheduleBody.appendChild(row);
   }
 
-  // --- Activar o desactivar carrera/área según semestre ---
   const semestreSelect = document.getElementById("semestre");
   const carreraSelect = document.getElementById("carrera");
   const areaSelect = document.getElementById("area-propedeutica");
@@ -97,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         option.textContent = area.nombre;
         select.appendChild(option);
       });
-    console.log("Áreas propedéuticas cargadas:", areas.length); // ← Para debug
+    console.log("Áreas propedéuticas cargadas:", areas.length); 
 
 
     } catch (error) {
@@ -141,17 +138,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     const carrera = document.getElementById("carrera").value;
     const area = document.getElementById("area-propedeutica").value;
 
-    const dropdown = document.getElementById("materialsDropdown");
-    const btn = document.getElementById("addClassBtn");
-
-    if (!dropdown || !btn) {
-      console.error("No se encontraron elementos del dropdown de materias");
+    const materiasList = document.getElementById("materias-list");
+    
+    if (!materiasList) {
+      console.error("No se encontró el contenedor de materias");
       return;
     }
 
     if (!semestre || semestre === "1") {
-      dropdown.innerHTML = '<option value="">Selecciona un semestre válido</option>';
-      btn.disabled = true;
+      materiasList.innerHTML = '<div class="materia-item">Selecciona un semestre válido</div>';
       return;
     }
 
@@ -177,86 +172,65 @@ document.addEventListener("DOMContentLoaded", async function () {
     console.log("Materias recibidas:", materias); 
 
     if (materias.length === 0) {
-      dropdown.innerHTML = '<option value="">No hay materias disponibles para estos filtros</option>';
-      btn.disabled = true;
+      materiasList.innerHTML = '<div class="materia-item">No hay materias disponibles para estos filtros</div>';
     } else {
-      dropdown.innerHTML = '<option value="">Selecciona una materia</option>';
-      materias.forEach((m) => {
-        const option = document.createElement("option");
-        option.value = m.id;
-        option.textContent = m.nombre;
-        dropdown.appendChild(option);
-      });
-      btn.disabled = dropdown.value === "";
-    }
-
-    // CORRECCIÓN: Remover event listeners antiguos antes de agregar nuevos
-    const newDropdown = dropdown.cloneNode(true);
-    dropdown.parentNode.replaceChild(newDropdown, dropdown);
-    
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-
-    // Agregar event listeners a los nuevos elementos
-    newDropdown.addEventListener("change", () => {
-      newBtn.disabled = !newDropdown.value;
-    });
-
-    // Event listener del botón "Agregar Clase"
-    newBtn.addEventListener("click", async () => {
-      const materiaId = newDropdown.value;
-      const materiaNombre = newDropdown.options[newDropdown.selectedIndex].text;
+      materiasList.innerHTML = ''; 
       
-      if (materiaId) {
-        const assignedList = document.getElementById("assigned-materials-list");
-        if (!assignedList) {
-          console.error("No se encontró la lista de materias asignadas");
-          return;
-        }
+      materias.forEach((materia) => {
+        const materiaItem = document.createElement("div");
+        materiaItem.className = "materia-item";
+        materiaItem.dataset.materiaId = materia.id;
+        materiaItem.dataset.materiaNombre = materia.nombre;
+        materiaItem.textContent = materia.nombre;
         
-        const existingMateria = assignedList.querySelector(`li[data-materia-id="${materiaId}"]`);
+        materiaItem.addEventListener("click", () => {
+          abrirModalConMateria(materia.id, materia.nombre);
+        });
         
-        if (existingMateria) {
-          alert("Esta materia ya está en la lista");
-          return;
-        }
-
-        // Agregar materia a la lista
-        const li = document.createElement("li");
-        li.dataset.materiaId = materiaId;
-        console.log(materiaId, materiaNombre);
-        li.dataset.materiaNombre = materiaNombre;
-        li.innerHTML = `
-          <span class="material-text">${materiaNombre}</span>
-          <div class="material-actions">
-              <span class="material-icons add-btn" title="Agregar horario">add_circle</span>
-          </div>
-        `;
-        assignedList.appendChild(li);
-
-        const modal = document.getElementById("addClassModal");
-        if (modal) {
-          const modalMateriaName = modal.querySelector("#modal-materia-name");
-          modalMateriaName.value = materiaNombre;
-          modal.classList.add("visible");
-          await cargarDocentes(materiaId);
-          
-          newDropdown.selectedIndex = 0;
-          newBtn.disabled = true;
-        }
-      }
-    });
+        materiasList.appendChild(materiaItem);
+      });
+    }
 
   } catch (err) {
     console.error("Error al cargar materias filtradas:", err);
-    const dropdown = document.getElementById("materialsDropdown");
-    if (dropdown) {
-      dropdown.innerHTML = '<option value="">Error al cargar materias</option>';
+    const materiasList = document.getElementById("materias-list");
+    if (materiasList) {
+      materiasList.innerHTML = '<div class="materia-item">Error al cargar materias</div>';
     }
-    const btn = document.getElementById("addClassBtn");
-    if (btn) {
-      btn.disabled = true;
-    }
+  }
+}
+
+function abrirModalConMateria(materiaId, materiaNombre) {
+  const assignedList = document.getElementById("assigned-materials-list");
+  if (!assignedList) {
+    console.error("No se encontró la lista de materias asignadas");
+    return;
+  }
+  
+  const existingMateria = assignedList.querySelector(`li[data-materia-id="${materiaId}"]`);
+  
+  if (existingMateria) {
+    alert("Esta materia ya está en la lista");
+    return;
+  }
+
+  const li = document.createElement("li");
+  li.dataset.materiaId = materiaId;
+  li.dataset.materiaNombre = materiaNombre;
+  li.innerHTML = `
+    <span class="material-text">${materiaNombre}</span>
+    <div class="material-actions">
+        <span class="material-icons add-btn" title="Agregar horario">add_circle</span>
+    </div>
+  `;
+  assignedList.appendChild(li);
+
+  const modal = document.getElementById("addClassModal");
+  if (modal) {
+    const modalMateriaName = modal.querySelector("#modal-materia-name");
+    modalMateriaName.value = materiaNombre;
+    modal.classList.add("visible");
+    cargarDocentes(materiaId);
   }
 }
 
@@ -265,7 +239,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
 
-  // --- Cargar modal desde AgregarClase ---
   const modalContainer = document.getElementById("modal-container");
   try {
     const response = await fetch("../AgregarClase/AgregarClase.html");
@@ -279,7 +252,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     const modal = modalContainer.querySelector("#addClassModal");
     const materialsList = document.getElementById("assigned-materials-list"); // CORREGIDO: Usar la lista correcta
 
-    // Cargar recursos primero
     await cargarAreasPropedeuticas();
     await cargarCarreras();
     await cargarAulas();
@@ -295,7 +267,6 @@ semestreSelect.addEventListener("change", function() {
 
 
 
-    // Inicializar lógica del modal después de cargar todos los recursos
     if (modal && materialsList) {
       initializeModalLogic(scheduleBody, modal, materialsList);
     } else {
@@ -333,25 +304,24 @@ async function validarCreacionGrupo() {
   const materias = document.querySelectorAll("#assigned-materials-list li");
   const horarioCeldas = document.querySelectorAll(".class-scheduled");
 
-  // Validaciones básicas
   if (!cicloActivo) {
-    alert("❌ No existe un ciclo escolar activo.");
+    alert("No existe un ciclo escolar activo.");
     return;
   }
 
   const regexValido = /^[A-Za-z0-9\sÁÉÍÓÚÑáéíóúñ-]+$/;
   if (!regexValido.test(nombreGrupo)) {
-    alert("⚠️ El nombre del grupo contiene caracteres inválidos.");
+    alert("El nombre del grupo contiene caracteres inválidos.");
     return;
   }
 
   if (semestre >= 2 && carrera === "tronco-comun") {
-    alert("⚠️ Debe seleccionar una carrera técnica para este semestre.");
+    alert("Debe seleccionar una carrera técnica para este semestre.");
     return;
   }
 
   if (semestre === 6 && area === "ninguna") {
-    alert("⚠️ Debe seleccionar un área propedéutica para este semestre.");
+    alert("Debe seleccionar un área propedéutica para este semestre.");
     return;
   }
 
@@ -361,46 +331,43 @@ async function validarCreacionGrupo() {
   ).length;
 
   if (materiasAsignadas < totalMaterias) {
-    alert("⚠️ Debe asignar clases para todas las materias antes de crear el grupo.");
+    alert("Debe asignar clases para todas las materias antes de crear el grupo.");
     return;
   }
 
   const horasRequeridas = 4;
   const horasAsignadas = horarioCeldas.length / totalMaterias;
   if (horasAsignadas < horasRequeridas) {
-    alert("⚠️ Faltan horas semanales por completar en alguna materia.");
+    alert("Faltan horas semanales por completar en alguna materia.");
     return;
   }
 
-  // ✅ PREPARAR DATOS PARA ENVIAR AL BACKEND
   try {
-    // Obtener todas las clases asignadas del horario
     const clases = obtenerClasesDelHorario();
 
     const clasesValidas = clases.filter(clase => {
   const esValida = clase.materiaId && !isNaN(clase.materiaId) && clase.horarios.length > 0;
   if (!esValida) {
-    console.error(`❌ Clase inválida omitida:`, clase);
+    console.error(`Clase invlida omitida:`, clase);
   }
   return esValida;
 });
 
 if (clasesValidas.length === 0) {
-  alert('❌ No hay clases válidas para enviar. Verifica que todas las materias tengan ID correcto.');
+  alert(' No hay clases válidas para enviar Verifica que todas las materias tengan ID correcto.');
   return;
 }
 
 
-    // Hardcodear algunos valores para pruebas
    const grupoData = {
-  nota: nombreGrupo, // ← "nota" no "node"
+  nota: nombreGrupo, 
   letra: nombreGrupo.charAt(0),
-  activo: true, // ← "activo" no "active"
-  semestre: semestre - 1, // ← número, no string
+  activo: true, 
+  semestre: semestre - 1, 
   turno: turno.toUpperCase(),
-  cicloEscolarId: 1, // ← "cicloEscolarId" no "tcloEscolarId"
-  carreraTecnicaId: carrera !== "tronco-comun" ? parseInt(carrera) : null, // ← "carreraTecnicaId" no "carrenTecnicaId"
-  areaPropedeuticaId: area !== "ninguna" ? parseInt(area) : null, // ← "areaPropedeuticaId" no "areaPropedenticalId"
+  cicloEscolarId: 1, 
+  carreraTecnicaId: carrera !== "tronco-comun" ? parseInt(carrera) : null, 
+  areaPropedeuticaId: area !== "ninguna" ? parseInt(area) : null, 
   clases: clasesValidas
 };
 
@@ -426,11 +393,10 @@ console.log("=== FIN DEBUG ===");
 
 
 
-// Y LUEGO MODIFICA el grupoData que ya tienes - cambia "clases: clases" por "clases: clasesValidas"
 grupoData.clases = clasesValidas;
 
-if (!validarDatosClases(clasesValidas)) {  // ← También cambia aquí
-  alert('❌ Error: Hay datos inválidos en las clases. Verifica que todos los docentes y aulas estén correctamente asignados.');
+if (!validarDatosClases(clasesValidas)) {  
+  alert(' Error: Hay datos inválidos en las clases. Verifica que todos los docentes y aulas estén correctamente asignados.');
   return;
 }
 
@@ -442,14 +408,13 @@ if (!validarDatosClases(clasesValidas)) {  // ← También cambia aquí
 
 
 if (!validarDatosClases(clases)) {
-  alert('❌ Error: Hay datos inválidos en las clases. Verifica que todos los docentes y aulas estén correctamente asignados.');
+  alert(' Error: Hay datos inválidos en las clases. Verifica que todos los docentes y aulas estén correctamente asignados.');
   return;
 }
 
-console.log("=== DEBUG DETALLADO ANTES DE ENVIAR ===");
+console.log("=== DEBUG  ANTES DE ENVIAR ===");
 console.log("Clases a enviar:", clases);
 
-// Debug detallado de cada clase
 clases.forEach((clase, index) => {
   console.log(`Clase ${index}:`, {
     materiaId: clase.materiaId,
@@ -463,7 +428,7 @@ clases.forEach((clase, index) => {
     }))
   });
 });
-console.log("=== FIN DEBUG ===");
+console.log("=== FIN DEBU==");
 
 
 
@@ -476,13 +441,11 @@ console.log("=== DEBUG FINAL - JSON A ENVIAR ===");
 console.log("grupoData.clases:", grupoData.clases);
 console.log("JSON.stringify:", JSON.stringify(grupoData));
 
-// Verifica específicamente la estructura de clases
 grupoData.clases.forEach((clase, index) => {
   console.log(`Clase ${index} propiedades:`, Object.keys(clase));
 });
 console.log("=== FIN DEBUG FINAL ===");
 
-// Luego hace el fetch...
 const response = await fetch('http://localhost:8080/grupos', {
   method: 'POST',
   headers: {
@@ -509,43 +472,62 @@ const response = await fetch('http://localhost:8080/grupos', {
 
 
 
-    // Enviar POST al backend
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `Error HTTP: ${response.status}`);
+      throw new Error(errorData.error || `Errr HTTP: ${response.status}`);
     }
 
     const grupoCreado = await response.json();
-    alert("✅ Grupo creado correctamente.");
+    alert(" Grupo creado correctamente.");
     console.log("Grupo creado:", grupoCreado);
     
-    // Opcional: Redirigir o limpiar el formulario
-    // window.location.href = '/lista-grupos'; // Redirigir a lista de grupos
-    // limpiarFormulario(); // Limpiar el formulario después de crear
-
+   
   } catch (error) {
     console.error('Error al crear el grupo:', error);
-    alert(`❌ Error al crear el grupo: ${error.message}`);
+    alert(`Error al crear el grupo: ${error.message}`);
   }
 }
 
-// ✅ FUNCIÓN PARA OBTENER LAS CLASES DEL HORARIO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function obtenerClasesDelHorario() {
   const clases = [];
   const celdasOcupadas = document.querySelectorAll('.class-scheduled');
   
-  // Agrupar celdas por materia
+  console.log(`Encontr ${celdasOcupadas.length} celdas ocupadas`);
+  
   const materiasMap = new Map();
   
   celdasOcupadas.forEach(cell => {
     const materiaNombre = cell.dataset.materia;
+    console.log("Procesando celda:", { 
+      materia: materiaNombre, 
+      hour: cell.dataset.hour, 
+      day: cell.dataset.day,
+      contenido: cell.innerHTML 
+    });
+    
     if (!materiaNombre) {
       console.warn('Celda sin materia asignada:', cell);
       return;
     }
     
-    const materiaId = obtenermateriaIdPorNombre(materiaNombre);
+    const materiaId = obtenerMateriaIdPorNombre(materiaNombre);
     if (!materiaId) {
       console.error(`Materia sin ID válido: ${materiaNombre}`);
       return;
@@ -556,44 +538,53 @@ function obtenerClasesDelHorario() {
         materiaId: materiaId,
         horarios: []
       });
+      console.log(`Nueva materia agregada al map: ${materiaNombre}`);
     }
     
     const dia = parseInt(cell.dataset.day);
     const hora = parseInt(cell.dataset.hour);
     
-    materiasMap.get(materiaNombre).horarios.push({
+    const aulaId = obtenerAulaIdDeCelda(cell);
+    const docenteId = obtenerDocenteIdDeCelda(cell);
+    
+    const horarioObj = {
       dia: dia,
       horaInicio: formatearHoraLocalTime(hora),
       horaFin: formatearHoraLocalTime(hora + 1),
-      aulaId: obtenerAulaIdDeCelda(cell),
-      docenteId: obtenerDocenteIdDeCelda(cell)
-    });
+      aulaId: aulaId,
+      docenteId: docenteId
+    };
+    
+    console.log("Agregando horario:", horarioObj);
+    materiasMap.get(materiaNombre).horarios.push(horarioObj);
+    console.log(`Horarios para ${materiaNombre}:`, materiasMap.get(materiaNombre).horarios.length);
   });
   
-  // Convertir el Map a array de clases y validar
   materiasMap.forEach((claseData, materiaNombre) => {
+    console.log(`Procesando ${materiaNombre}:`, claseData);
+    
     if (claseData.materiaId && claseData.horarios.length > 0) {
-      clases.push({
+      const primerHorario = claseData.horarios[0];
+      
+      const claseObj = {
         materiaId: claseData.materiaId,
+        docenteId: primerHorario.docenteId,
+        aulaId: primerHorario.aulaId,
         horarios: claseData.horarios
-      });
+      };
+      
+      console.log(`Clase válida agregada: ${materiaNombre}`, claseObj);
+      clases.push(claseObj);
     } else {
       console.error(`Clase inválida omitida: ${materiaNombre}`, claseData);
     }
   });
   
-  console.log("Clases validadas:", clases);
+  console.log("Clases finales validadas:", clases);
   return clases;
 }
 
-// ✅ NUEVA FUNCIÓN: Formatear hora como string para LocalTime
-function formatearHoraLocalTime(hora) {
-  // Formato: "HH:00:00" para LocalTime
-  return `${hora.toString().padStart(2, '0')}:00:00`;
-}
-
-// ✅ FUNCIÓN AUXILIAR: Obtener ID de materia por nombre
-function obtenermateriaIdPorNombre(materiaNombre) {
+function obtenerMateriaIdPorNombre(materiaNombre) {
   const materiasAsignadas = document.querySelectorAll('#assigned-materials-list li');
   
   console.log(`Buscando ID para materia: "${materiaNombre}"`);
@@ -605,81 +596,176 @@ function obtenermateriaIdPorNombre(materiaNombre) {
     if (li.dataset.materiaNombre === materiaNombre) {
       const materiaId = li.dataset.materiaId;
       
-      // Validación más estricta
       if (!materiaId || materiaId === 'undefined' || materiaId === 'null' || materiaId === '') {
-        console.error(`❌ ID de materia NO válido para: "${materiaNombre}"`, materiaId);
+        console.error(`ID de materia NO válido para: "${materiaNombre}"`, materiaId);
         return null;
       }
       
       const idNumero = parseInt(materiaId);
       if (isNaN(idNumero)) {
-        console.error(`❌ ID de materia no es número: "${materiaNombre}" -> "${materiaId}"`);
+        console.error(` ID de materia no es número: "${materiaNombre}" -> "${materiaId}"`);
         return null;
       }
       
-      console.log(`✅ ID encontrado: "${materiaNombre}" -> ${idNumero}`);
+      console.log(` ID encontrado: "${materiaNombre}" -> ${idNumero}`);
       return idNumero;
     }
   }
   
-  console.error(`❌ No se encontró materia en DOM: "${materiaNombre}"`);
+  console.error(` No se encontró materia en DOM: "${materiaNombre}"`);
   return null;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ✅ NUEVA FUNCIÓN: Formatear hora como string para LocalTime
+function formatearHoraLocalTime(hora) {
+  // Formato: "HH:00:00" para LocalTime
+  return `${hora.toString().padStart(2, '0')}:00:00`;
+}
+
+// ✅ FUNCIÓN AUXILIAR: Obtener ID de materia por nombre
+// function obtenermateriaIdPorNombre(materiaNombre) {
+//   const materiasAsignadas = document.querySelectorAll('#assigned-materials-list li');
+  
+//   console.log(`Buscando ID para materia: "${materiaNombre}"`);
+//   console.log("Materias disponibles en DOM:", materiasAsignadas.length);
+  
+//   for (const li of materiasAsignadas) {
+//     console.log(`- Li: ${li.dataset.materiaNombre} -> ID: ${li.dataset.materiaId}`);
+    
+//     if (li.dataset.materiaNombre === materiaNombre) {
+//       const materiaId = li.dataset.materiaId;
+      
+//       // Validación más estricta
+//       if (!materiaId || materiaId === 'undefined' || materiaId === 'null' || materiaId === '') {
+//         console.error(`❌ ID de materia NO válido para: "${materiaNombre}"`, materiaId);
+//         return null;
+//       }
+      
+//       const idNumero = parseInt(materiaId);
+//       if (isNaN(idNumero)) {
+//         console.error(`❌ ID de materia no es número: "${materiaNombre}" -> "${materiaId}"`);
+//         return null;
+//       }
+      
+//       console.log(`✅ ID encontrado: "${materiaNombre}" -> ${idNumero}`);
+//       return idNumero;
+//     }
+//   }
+  
+//   console.error(`❌ No se encontró materia en DOM: "${materiaNombre}"`);
+//   return null;
+// }
 
 
 // ✅ FUNCIÓN AUXILIAR: Obtener ID de aula de la celda
 function obtenerAulaIdDeCelda(cell) {
   // Buscar el texto del aula en el contenido de la celda
   const contenido = cell.innerHTML;
-  const aulaMatch = contenido.match(/Aula:\s*(\w+)/);
+  console.log("Contenido de celda para buscar aula:", contenido);
+  
+  // Mejorar la regex para capturar mejor
+  const aulaMatch = contenido.match(/Aula:\s*([^<]+)/);
   if (aulaMatch) {
-    const aulaNombre = aulaMatch[1];
+    const aulaNombre = aulaMatch[1].trim();
+    console.log("Aula encontrada en celda:", aulaNombre);
+    
     // Buscar el ID del aula en el dropdown del modal
     const aulaSelect = document.getElementById('modal-aula');
     if (aulaSelect) {
       for (const option of aulaSelect.options) {
+        console.log(`Comparando: "${option.text}" con "${aulaNombre}"`);
         if (option.text === aulaNombre) {
+          console.log(`✅ Aula encontrada: ${aulaNombre} -> ID: ${option.value}`);
           return parseInt(option.value);
         }
       }
+      console.warn(`❌ Aula "${aulaNombre}" no encontrada en dropdown`);
+    } else {
+      console.error('❌ No se encontró el dropdown de aulas');
+    }
+  } else {
+    console.warn('❌ No se pudo extraer nombre de aula del contenido');
+  }
+  
+  // Si falla, intentar obtener del dataset del li de materia
+  const materiaNombre = cell.dataset.materia;
+  if (materiaNombre) {
+    const materiaLi = document.querySelector(`li[data-materia-nombre="${materiaNombre}"]`);
+    if (materiaLi && materiaLi.dataset.aula && materiaLi.dataset.aula !== 'undefined') {
+      console.log(`✅ Aula encontrada en dataset: ${materiaLi.dataset.aula}`);
+      return parseInt(materiaLi.dataset.aula);
     }
   }
-  return 1; // Hardcodeado para pruebas
+  
+  console.error('❌ No se pudo obtener aulaId para celda');
+  return null;
 }
+
 
 // ✅ FUNCIÓN AUXILIAR: Obtener ID de docente de la celda
 function obtenerDocenteIdDeCelda(cell) {
   // Buscar el nombre del docente en el contenido de la celda
   const contenido = cell.innerHTML;
+  console.log("Contenido de celda para buscar docente:", contenido);
+  
   const lineas = contenido.split('<br>');
   
   if (lineas.length > 1 && lineas[1].trim() && !lineas[1].includes('undefined')) {
     const docenteNombre = lineas[1].trim();
+    console.log("Docente encontrado en celda:", docenteNombre);
     
     // Buscar el ID del docente en el dropdown del modal
     const docenteSelect = document.getElementById('modal-docente');
     if (docenteSelect) {
       for (const option of docenteSelect.options) {
+        console.log(`Comparando: "${option.text}" con "${docenteNombre}"`);
         if (option.text === docenteNombre) {
+          console.log(`✅ Docente encontrado: ${docenteNombre} -> ID: ${option.value}`);
           return parseInt(option.value);
         }
       }
+      console.warn(`❌ Docente "${docenteNombre}" no encontrado en dropdown`);
+    } else {
+      console.error('❌ No se encontró el dropdown de docentes');
     }
+  } else {
+    console.warn('❌ No se pudo extraer nombre de docente del contenido');
   }
-
-
   
   // Si no se encuentra, buscar en el dataset del li
   const materiaNombre = cell.dataset.materia;
-  const materiaLi = document.querySelector(`li[data-materia-nombre="${materiaNombre}"]`);
-  if (materiaLi && materiaLi.dataset.docente && materiaLi.dataset.docente !== 'undefined') {
-    return parseInt(materiaLi.dataset.docente);
+  if (materiaNombre) {
+    const materiaLi = document.querySelector(`li[data-materia-nombre="${materiaNombre}"]`);
+    if (materiaLi && materiaLi.dataset.docente && materiaLi.dataset.docente !== 'undefined') {
+      console.log(`✅ Docente encontrado en dataset: ID ${materiaLi.dataset.docente}`);
+      return parseInt(materiaLi.dataset.docente);
+    }
   }
   
-  console.warn(`No se pudo obtener docenteId para celda, usando valor por defecto: 1`);
-  return 3; // Hardcodeado para pruebas
+  console.error(`❌ No se pudo obtener docenteId para celda`);
+  return null;
 }
-
 
 
 function validarDatosClases(clases) {
@@ -729,13 +815,72 @@ function limpiarFormulario() {
   document.getElementById('area-propedeutica').selectedIndex = 0;
   document.getElementById('assigned-materials-list').innerHTML = '';
   
+
+
+
+
+
+
+
+
+
+
+
   // Limpiar horario
   const celdasOcupadas = document.querySelectorAll('.class-scheduled');
-  celdasOcupadas.forEach(cell => {
-    cell.classList.remove('class-scheduled');
-    cell.removeAttribute('data-materia');
-    cell.innerHTML = '';
-  });
+ celdasOcupadas.forEach(cell => {
+  const materiaNombre = cell.dataset.materia;
+  console.log("Procesando celda:", { materia: materiaNombre, hour: cell.dataset.hour, day: cell.dataset.day });
+  
+  if (!materiaNombre) {
+    console.warn('Celda sin materia asignada:', cell);
+    return;
+  }
+  
+  const materiaId = obtenerMateriaIdPorNombre(materiaNombre);
+  if (!materiaId) {
+    console.error(`Materia sin ID válido: ${materiaNombre}`);
+    return;
+  }
+  
+  if (!materiasMap.has(materiaNombre)) {
+    materiasMap.set(materiaNombre, {
+      materiaId: materiaId,
+      horarios: []
+    });
+    console.log(`Nueva materia agregada al map: ${materiaNombre}`);
+  }
+  
+  const dia = parseInt(cell.dataset.day);
+  const hora = parseInt(cell.dataset.hour);
+  
+  const horarioObj = {
+    dia: dia,
+    horaInicio: formatearHoraLocalTime(hora),
+    horaFin: formatearHoraLocalTime(hora + 1),
+    aulaId: obtenerAulaIdDeCelda(cell),
+    docenteId: obtenerDocenteIdDeCelda(cell)
+  };
+  
+  console.log("Agregando horario:", horarioObj);
+  materiasMap.get(materiaNombre).horarios.push(horarioObj);
+  console.log(`Horarios para ${materiaNombre}:`, materiasMap.get(materiaNombre).horarios.length);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 // ------------------------------------------------------------

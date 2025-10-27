@@ -58,55 +58,45 @@
 
       <hr />
 
+      <main class="main-container">
+        <div class="materias-column">
+          <div class="materias-container">
+            <h3>Materias disponibles</h3>
+            <div id="materias-list" class="materias-list">
+            </div>
+          </div>
 
+          <div class="assigned-materias">
+            <h3>Materias asignadas al grupo</h3>
+            <ul id="assigned-materials-list" class="materials-list">
+            </ul>
+          </div>
+        </div>
 
-
-
-
-
-
-      <main class="main-content">
-  <!-- Sección de materias asignadas (primero para que se vea arriba) -->
-  <div class="materials-section">
-    <h2>Materias asignadas</h2>
-    <ul id="assigned-materials-list" class="materials-list">
-      <!-- Las materias se agregarán aquí dinámicamente -->
-    </ul>
-  </div>
-
-  <!-- Sección para agregar nuevas materias (después de las asignadas) -->
-  <div class="materials-section">
-    <h2>Selecciona una materia</h2>
-    <div class="add-materia-container">
-      <select id="materialsDropdown">
-        <option value="">Primero selecciona semestre, carrera y área</option>
-      </select>
-      <button id="addClassBtn" disabled class="btn btn-primary">Agregar Clase</button>
-    </div>
-  </div>
-
-  <!-- Horario (mantén igual) -->
-  <div class="schedule-section">
-    <h2>Horario</h2>
-    <table class="schedule-table">
-    <thead>
-        <tr>
-            <th>Hora</th>
-            <th>Lunes</th>
-            <th>Martes</th>
-            <th>Miércoles</th>
-            <th>Jueves</th>
-            <th>Viernes</th>
-            <th>Sábado</th>
-            <th>Domingo</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- El horario se generará dinámicamente -->
-    </tbody>
-</table>
-  </div>
-</main>
+        <div class="horario-column">
+          <div class="schedule-section">
+            <h2>Horario</h2>
+            <div class="schedule-container">
+              <table class="schedule-table">
+                <thead>
+                  <tr>
+                    <th>Hora</th>
+                    <th>Lunes</th>
+                    <th>Martes</th>
+                    <th>Miércoles</th>
+                    <th>Jueves</th>
+                    <th>Viernes</th>
+                    <th>Sábado</th>
+                    <th>Domingo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
 
       <footer class="form-actions">
         <button class="btn btn-primary" id="create-group-btn">Crear grupo</button>
