@@ -105,7 +105,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     timeHeaderCell.textContent = `${hour}:00`;
     row.appendChild(timeHeaderCell);
 
-    for (let day = 0; day < 7; day++) {
+    // for (let day = 0; day < 7; day++) {
+    for (let day = 0; day < 6; day++) {
       const cell = document.createElement("td");
       cell.dataset.hour = hour;
 
@@ -199,9 +200,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         return;
       }
 
-      if (!semestre || semestre === "1") {
+      if (!semestre ) {
         materiasList.innerHTML =
-          '<div class="materia-item">Selecciona un semestre válido</div>';
+          '<div class="materia-item">Selecciona un semestre</div>';
         return;
       }
 
@@ -348,7 +349,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 function abrirModalParaLi(li) {
   materiaActualLi = li;
-
+  
   const modal = document.getElementById("addClassModal");
   if (!modal) return;
 
@@ -375,13 +376,20 @@ function abrirModalParaLi(li) {
     try {
       const horarios = JSON.parse(li.dataset.horarios);
       horarios.forEach((h) => {
-        horariosListBody.appendChild(crearFilaHorarioDesdeObj(h));
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td data-day-value="${h.day}">${h.dayText}</td>
+          <td>${h.start}:00</td>
+          <td>${h.end}:00</td>
+          <td><button type="button" class="delete-horario-btn">Eliminar</button></td>
+        `;
+        horariosListBody.appendChild(row);
       });
     } catch (e) {
       console.warn("Error parseando horarios guardados:", e);
     }
   }
-
+  
   modal.classList.add("visible");
 }
 
@@ -409,7 +417,7 @@ function initializeModalLogic(scheduleBody, modal, materialsList) {
     { value: "3", text: "Jueves" },
     { value: "4", text: "Viernes" },
     { value: "5", text: "Sábado" },
-    { value: "6", text: "Domingo" },
+    // { value: "6", text: "Domingo" },
   ];
 
   if (horarioDiaSelect) {

@@ -2,6 +2,15 @@
     box-sizing: border-box;
 }
 
+.schedule-table tbody td {
+    position: static; 
+    overflow: hidden;
+}
+
+.schedule-table .class-scheduled {
+ 
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f8f9fa;
@@ -234,11 +243,19 @@ hr {
     text-align: left;
     border-radius: 4px;
     cursor: default;
-    line-height: 1.2;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+     line-height: 1.2;
+     height: 100%; 
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* justify-content: flex-start; */
+
+
+
+   position: static; 
+     height: auto; 
+     min-height: 100%; 
+     z-index: 1; 
+
 }
 
 .schedule-table .class-scheduled strong {
