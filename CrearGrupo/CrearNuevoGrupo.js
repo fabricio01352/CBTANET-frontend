@@ -43,20 +43,24 @@ document.addEventListener("DOMContentLoaded", async function () {
   const startTime = 7;
   const endTime = 14;
 
-  for (let hour = startTime; hour <= endTime; hour++) {
-    const row = document.createElement("tr");
-    const timeHeaderCell = document.createElement("th");
-    timeHeaderCell.textContent = `${hour}:00`;
-    row.appendChild(timeHeaderCell);
+  scheduleBody.innerHTML = '';
+for (let hour = startTime; hour <= endTime; hour++) {
+  const row = document.createElement("tr");
+  const timeHeaderCell = document.createElement("th");
+  timeHeaderCell.textContent = `${hour}:00`;
+  row.appendChild(timeHeaderCell);
 
-    for (let day = 0; day < 7; day++) {
-      const cell = document.createElement("td");
-      cell.dataset.hour = hour;
-      cell.dataset.day = day;
-      row.appendChild(cell);
-    }
-    scheduleBody.appendChild(row);
+  for (let day = 0; day < 7; day++) {
+    const cell = document.createElement("td");
+    cell.dataset.hour = hour;
+    cell.dataset.day = day;
+    // Asegurar que las celdas empiecen vacías
+    cell.innerHTML = '';
+    cell.className = '';
+    row.appendChild(cell);
   }
+  scheduleBody.appendChild(row);
+}
 
   const semestreSelect = document.getElementById("semestre");
   const carreraSelect = document.getElementById("carrera");
@@ -890,10 +894,7 @@ function initializeModalLogic(scheduleBody, modal, materialsList) {
   console.log("Inicializando modal logic...", { materialsList, modal });
 
   if (!materialsList || !modal) {
-    console.error(
-      "initializeModalLogic: materialsList o modal no encontrados.",
-      { materialsList, modal }
-    );
+    console.error("initializeModalLogic: materialsList o modal no encontrados.", { materialsList, modal });
     return;
   }
 
@@ -904,13 +905,34 @@ function initializeModalLogic(scheduleBody, modal, materialsList) {
   const cancelBtn = modal.querySelector("#cancel-btn");
   const modalDocente = modal.querySelector("#modal-docente");
   const modalAula = modal.querySelector("#modal-aula");
+  const horarioDiaSelect = modal.querySelector("#horario-dia");
 
   let materiaActualLi = null;
 
+  // Mapeo correcto de días
+  const diasSemana = [
+    { value: "0", text: "Lunes" },
+    { value: "1", text: "Martes" },
+    { value: "2", text: "Miércoles" },
+    { value: "3", text: "Jueves" },
+    { value: "4", text: "Viernes" },
+    { value: "5", text: "Sábado" },
+    { value: "6", text: "Domingo" }
+  ];
+
+  // Inicializar select de días
+  if (horarioDiaSelect) {
+    horarioDiaSelect.innerHTML = diasSemana.map(dia => 
+      `<option value="${dia.value}">${dia.text}</option>`
+    ).join('');
+  }
+
   const crearFilaHorarioDesdeObj = (h) => {
     const row = document.createElement("tr");
+    const diaText = diasSemana.find(dia => dia.value === h.day.toString())?.text || `Día ${h.day}`;
+    
     row.innerHTML = `
-      <td data-day-value="${h.day}">${h.dayText}</td>
+      <td data-day-value="${h.day}">${diaText}</td>
       <td>${h.start}:00</td>
       <td>${h.end}:00</td>
       <td><button type="button" class="delete-horario-btn">🗑️</button></td>
@@ -925,30 +947,16 @@ function initializeModalLogic(scheduleBody, modal, materialsList) {
     modalDocente.value = li.dataset.docente || "";
     modalAula.value = li.dataset.aula || "";
 
-    console.log("=== DEBUG DOCENTES ===");
-  console.log("Modal docente select:", modalDocente);
-  console.log("Opciones disponibles:", modalDocente.options.length);
-  console.log("Valor seleccionado:", modalDocente.value);
-  console.log("Valor del dataset:", li.dataset.docente);
+    console.log("Abriendo modal para:", li.dataset.materiaNombre);
 
-const materiaId = li.dataset.materiaId;
-  if (materiaId) {
-    cargarDocentes(materiaId).then(() => {
-      // ✅ DEBUG después de cargar docentes
-      console.log("Después de cargar docentes - Opciones:", modalDocente.options.length);
-      console.log("Después de cargar docentes - Valor:", modalDocente.value);
-      
-      // Si hay un docente guardado, seleccionarlo
-      if (li.dataset.docente && li.dataset.docente !== "undefined") {
-        modalDocente.value = li.dataset.docente;
-        console.log("Docente seleccionado del dataset:", modalDocente.value);
-      }
-    });
-  }
-
-
-
-
+    const materiaId = li.dataset.materiaId;
+    if (materiaId) {
+      cargarDocentes(materiaId).then(() => {
+        if (li.dataset.docente && li.dataset.docente !== "undefined") {
+          modalDocente.value = li.dataset.docente;
+        }
+      });
+    }
 
     if (li.dataset.horarios) {
       try {
@@ -963,31 +971,27 @@ const materiaId = li.dataset.materiaId;
     modal.classList.add("visible");
   };
 
-  // CORRECCIÓN: Delegación de eventos para la lista de materias
+  // Delegación de eventos para la lista de materias
   materialsList.addEventListener("click", (event) => {
     const target = event.target;
     const li = target.closest("li");
     if (!li) return;
 
-    // Verificar si es botón de agregar
     if (target.classList.contains("add-btn") || target.closest(".add-btn")) {
       abrirModalParaLi(li);
       return;
     }
 
-    // Verificar si es botón de editar
     if (target.classList.contains("edit-btn") || target.closest(".edit-btn")) {
       abrirModalParaLi(li);
       return;
     }
 
-    // Verificar si es botón de eliminar
     if (target.classList.contains("delete-btn") || target.closest(".delete-btn")) {
       if (!confirm("¿Eliminar esta clase del horario?")) return;
       
       const materiaNombre = li.dataset.materiaNombre;
       if (materiaNombre) {
-        // Limpiar celdas del horario
         const celdas = scheduleBody.querySelectorAll(`td[data-materia="${materiaNombre}"]`);
         celdas.forEach((c) => {
           c.classList.remove("class-scheduled");
@@ -996,7 +1000,6 @@ const materiaId = li.dataset.materiaId;
         });
       }
       
-      // Eliminar la materia de la lista
       li.remove();
       return;
     }
@@ -1007,31 +1010,33 @@ const materiaId = li.dataset.materiaId;
     materiaActualLi = null;
   };
 
-  // Manejo del cierre del modal
   if (cancelBtn) {
     cancelBtn.addEventListener("click", closeModal);
   }
 
-  // Cerrar modal al hacer clic fuera
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       closeModal();
     }
   });
 
-  // Cerrar modal con Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal.classList.contains("visible")) {
       closeModal();
     }
   });
 
-  // Agregar horario
+  // Agregar horario - VERSIÓN CORREGIDA
   if (addHorarioBtn) {
     addHorarioBtn.addEventListener("click", () => {
       const diaSelect = modal.querySelector("#horario-dia");
       const inicio = modal.querySelector("#horario-inicio");
       const fin = modal.querySelector("#horario-fin");
+
+      if (!diaSelect.value) {
+        alert("Selecciona un día");
+        return;
+      }
 
       if (!inicio.value || !fin.value) {
         alert("Selecciona inicio y fin de horario");
@@ -1046,15 +1051,39 @@ const materiaId = li.dataset.materiaId;
         return;
       }
 
-      const row = document.createElement("tr");
+      const dayValue = parseInt(diaSelect.value);
       const dayText = diaSelect.options[diaSelect.selectedIndex].text;
+
+      // Verificar si ya existe este horario en la lista
+      const horariosExistentes = horariosListBody.querySelectorAll("tr");
+      for (let row of horariosExistentes) {
+        const existingDay = parseInt(row.cells[0].dataset.dayValue);
+        const existingStart = parseInt(row.cells[1].textContent.split(':')[0]);
+        const existingEnd = parseInt(row.cells[2].textContent.split(':')[0]);
+        
+        if (existingDay === dayValue) {
+          // Verificar superposición de horarios
+          if ((inicioHora >= existingStart && inicioHora < existingEnd) ||
+              (finHora > existingStart && finHora <= existingEnd) ||
+              (inicioHora <= existingStart && finHora >= existingEnd)) {
+            alert(`Ya existe un horario programado para el ${dayText} en ese rango de horas`);
+            return;
+          }
+        }
+      }
+
+      const row = document.createElement("tr");
       row.innerHTML = `
-        <td data-day-value="${diaSelect.value}">${dayText}</td>
+        <td data-day-value="${dayValue}">${dayText}</td>
         <td>${inicioHora}:00</td>
         <td>${finHora}:00</td>
         <td><button type="button" class="delete-horario-btn">🗑️</button></td>
       `;
       horariosListBody.appendChild(row);
+
+      // Limpiar selects
+      inicio.value = "";
+      fin.value = "";
     });
   }
 
@@ -1067,7 +1096,7 @@ const materiaId = li.dataset.materiaId;
     });
   }
 
-  // Confirmar horarios
+  // Confirmar horarios - VERSIÓN COMPLETAMENTE CORREGIDA
   if (confirmBtn) {
     confirmBtn.addEventListener("click", () => {
       if (!materiaActualLi) {
@@ -1078,26 +1107,16 @@ const materiaId = li.dataset.materiaId;
       const materia = modalMateriaName.value.trim();
       const docente = modalDocente.value.trim();
       const aula = modalAula.value.trim();
-  console.log("Validando docente - valor:", docente, "tipo:", typeof docente);
+      
+      if (!docente || docente === "" || docente === "undefined") {
+        alert("Debe seleccionar un docente válido");
+        return;
+      }
 
-
-if (!docente || docente === "" || docente === "undefined") {
-    alert("Debe seleccionar un docente válido");
-    
-        console.log("Dropdown de docentes:", {
-      value: modalDocente.value,
-      selectedIndex: modalDocente.selectedIndex,
-      options: Array.from(modalDocente.options).map(opt => ({value: opt.value, text: opt.text}))
-    });
-    return;
-  }
-
-  
-
-  if (!aula || aula === "" || aula === "undefined") {
-    alert("Debe seleccionar un aula válida");
-    return;
-  }
+      if (!aula || aula === "" || aula === "undefined") {
+        alert("Debe seleccionar un aula válida");
+        return;
+      }
       
       const horariosRows = horariosListBody.querySelectorAll("tr");
 
@@ -1106,53 +1125,76 @@ if (!docente || docente === "" || docente === "undefined") {
         return;
       }
 
+      // Obtener nombres para mostrar
+      const docenteSelect = document.getElementById('modal-docente');
+      const aulaSelect = document.getElementById('modal-aula');
+      const docenteNombre = docenteSelect?.options[docenteSelect.selectedIndex]?.text || 'Docente';
+      const aulaNombre = aulaSelect?.options[aulaSelect.selectedIndex]?.text || 'Aula';
+
+      // Verificar conflictos
       let conflicto = false;
       const horariosObjs = [];
       
-      // Verificar conflictos
       horariosRows.forEach((row) => {
-        const day = row.cells[0].dataset.dayValue;
+        const dayValue = parseInt(row.cells[0].dataset.dayValue);
         const dayText = row.cells[0].textContent.trim();
         const start = parseInt(row.cells[1].textContent.split(":")[0]);
         const end = parseInt(row.cells[2].textContent.split(":")[0]);
 
-        horariosObjs.push({ day, dayText, start, end });
+        horariosObjs.push({ day: dayValue, dayText, start, end });
 
+        // Verificar cada hora del rango
         for (let h = start; h < end; h++) {
-          const cell = scheduleBody.querySelector(`td[data-day="${day}"][data-hour="${h}"]`);
-          if (cell && cell.classList.contains("class-scheduled")) {
-            const existingMateria = cell.dataset.materia;
-            if (existingMateria && existingMateria !== materia) {
-              alert(`Conflicto: el aula/docente ya está ocupado el ${dayText} a las ${h}:00.`);
-              conflicto = true;
-              break;
+          const cell = scheduleBody.querySelector(`td[data-day="${dayValue}"][data-hour="${h}"]`);
+          if (cell) {
+            // Verificar si la celda ya tiene una clase (de cualquier materia)
+            if (cell.classList.contains("class-scheduled")) {
+              const existingMateria = cell.dataset.materia;
+              // Si es la misma materia, permitimos (para edición)
+              // Si es diferente materia, hay conflicto
+              if (existingMateria && existingMateria !== materia) {
+                alert(`Conflicto: Ya existe la clase "${existingMateria}" programada el ${dayText} a las ${h}:00.`);
+                conflicto = true;
+                return;
+              }
             }
           }
         }
-        if (conflicto) return;
       });
 
       if (conflicto) return;
 
-      // Limpiar asignaciones anteriores de esta materia
+      // LIMPIAR ASIGNACIONES ANTERIORES DE ESTA MATERIA - MÉTODO MEJORADO
       const materiaAnterior = materiaActualLi.dataset.materiaNombre;
       if (materiaAnterior) {
         const prevCells = scheduleBody.querySelectorAll(`td[data-materia="${materiaAnterior}"]`);
-        prevCells.forEach((c) => {
-          c.classList.remove("class-scheduled");
-          c.removeAttribute("data-materia");
-          c.innerHTML = "";
+        prevCells.forEach((cell) => {
+          cell.classList.remove("class-scheduled");
+          cell.removeAttribute("data-materia");
+          cell.innerHTML = ""; // LIMPIAR COMPLETAMENTE el contenido
         });
       }
 
-      // Aplicar nuevos horarios
+      // APLICAR NUEVOS HORARIOS - MÉTODO CORREGIDO
       horariosObjs.forEach((h) => {
         for (let hh = h.start; hh < h.end; hh++) {
           const cell = scheduleBody.querySelector(`td[data-day="${h.day}"][data-hour="${hh}"]`);
           if (cell) {
+            // LIMPIAR LA CELDA ANTES DE AGREGAR NUEVO CONTENIDO
+            cell.innerHTML = "";
+            
             cell.classList.add("class-scheduled");
             cell.dataset.materia = materia;
-            cell.innerHTML = `<strong>${materia}</strong><br>${docente || ""}<br>Aula: ${aula || ""}`;
+            
+            // AGREGAR CONTENIDO LIMPIO Y ESTRUCTURADO
+            const contenido = `
+              <div class="class-content">
+                <strong>${materia}</strong><br>
+                ${docenteNombre}<br>
+                Aula: ${aulaNombre}
+              </div>
+            `;
+            cell.innerHTML = contenido;
           }
         }
       });
