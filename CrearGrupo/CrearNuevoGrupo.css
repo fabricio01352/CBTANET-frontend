@@ -1,10 +1,15 @@
 /* Estilos generales */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
     color: #333;
     margin: 0;
     padding: 2rem;
+    line-height: 1.5;
 }
 
 .container {
@@ -21,19 +26,26 @@ header h1 {
     margin: 0;
     font-size: 2rem;
     color: #1c1c1e;
+    margin-bottom: 0.5rem;
 }
 
 header .subtitle {
-    margin: 0.25rem 0 2rem 0;
+    margin: 0;
     color: #6c757d;
+    font-size: 1.1rem;
 }
 
 /* Formulario superior */
 .group-details {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 2rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
 }
 
 .form-field label {
@@ -51,20 +63,56 @@ header .subtitle {
     border-radius: 6px;
     background-color: #f8f9fa;
     font-size: 1rem;
+    font-family: inherit;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+    outline: none;
+    border-color: #212529;
+    background-color: #fff;
 }
 
 hr {
     border: none;
     height: 1px;
     background-color: #e9ecef;
-    margin-bottom: 2rem;
+    margin: 2rem 0;
 }
 
-/* Contenido principal (materias y horario) */
+/* Contenido principal */
 .main-content {
-    display: grid;
-    grid-template-columns: 250px 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
+}
+
+.materials-section {
+    margin-bottom: 1rem;
+}
+
+.materials-section h2 {
+    margin-bottom: 1rem;
+    color: #1c1c1e;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Contenedor para agregar materias */
+.add-materia-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+}
+
+.add-materia-container select {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    font-size: 1rem;
 }
 
 /* Lista de materias */
@@ -76,6 +124,7 @@ hr {
 
 .materials-list li {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: 0.75rem;
     margin-bottom: 0.5rem;
@@ -90,16 +139,67 @@ hr {
     background-color: #e9ecef;
 }
 
-.materials-list .material-icons {
-    margin-right: 0.75rem;
+.material-text {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 0.5rem;
+}
+
+.material-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.material-actions .material-icons {
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 6px;
+    font-size: 20px;
+    transition: all 0.2s;
+}
+
+.material-actions .material-icons:hover {
+    background-color: rgba(0,0,0,0.1);
+    transform: scale(1.1);
+}
+
+.material-actions .add-btn {
     color: #4CAF50;
 }
 
+.material-actions .edit-btn {
+    color: #2196F3;
+}
+
+.material-actions .delete-btn {
+    color: #f44336;
+}
+
+/* Materias asignadas */
+#assigned-materials-list li.materia-asignada {
+    background-color: #e8f5e8;
+    border-color: #4CAF50;
+}
+
+#assigned-materials-list li.materia-asignada .material-text {
+    color: #2e7d32;
+    font-weight: 500;
+}
+
 /* Tabla del horario */
+.schedule-section {
+    margin-top: 1rem;
+}
+
 .schedule-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* Asegura que las columnas tengan el mismo ancho */
+    table-layout: fixed;
+    margin-top: 1rem;
 }
 
 .schedule-table th,
@@ -107,33 +207,58 @@ hr {
     border: 1px solid #dee2e6;
     padding: 0.5rem;
     text-align: center;
-    height: 50px; /* Altura fija para las celdas */
+    height: 60px;
+    vertical-align: top;
 }
 
 .schedule-table thead th {
     background-color: #f8f9fa;
     font-weight: 600;
+    color: #495057;
 }
 
 .schedule-table tbody th {
     font-weight: 600;
     background-color: #f8f9fa;
-    width: 80px; /* Ancho para la columna de horas */
+    width: 80px;
+    color: #495057;
 }
 
 .schedule-table tbody td {
     cursor: pointer;
     transition: background-color 0.2s;
+    position: relative;
 }
 
 .schedule-table tbody td:hover {
-    background-color: #e0e0e0;
+    background-color: #e9ecef;
 }
 
-/* Celda seleccionada en el horario */
-.schedule-table .cell-selected {
-    background-color: #007bff;
+/* Celda con clase asignada */
+.schedule-table .class-scheduled {
+    background-color: #0d6efd;
     color: white;
+    font-size: 0.7rem;
+    padding: 4px;
+    text-align: left;
+    border-radius: 4px;
+    cursor: default;
+    line-height: 1.2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.schedule-table .class-scheduled strong {
+    display: block;
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+.schedule-table .class-scheduled:hover {
+    background-color: #0b5ed7;
 }
 
 /* Botones */
@@ -151,11 +276,20 @@ hr {
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
 }
 
 .btn:hover {
-    opacity: 0.85;
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
 }
 
 .btn-primary {
@@ -168,35 +302,42 @@ hr {
     color: #fff;
 }
 
-.materials-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.75rem;
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
-.material-text {
-    flex: 1 1 auto;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding-right: 0.5rem;
-}
-
-.material-actions {
-    display: flex;
-    gap: 0.5rem; /* espacio entre iconos */
-    align-items: center;
-    flex: 0 0 auto;
-}
-
-.material-actions .material-icons {
-    cursor: pointer;
-    padding: 0.25rem;
-    border-radius: 6px;
-    font-size: 20px;
-}
-
-.material-actions .material-icons:hover {
-    background-color: rgba(0,0,0,0.06);
+/* Responsive */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    
+    .container {
+        padding: 1.5rem;
+    }
+    
+    .group-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .add-materia-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .schedule-table {
+        font-size: 0.8rem;
+    }
+    
+    .schedule-table th,
+    .schedule-table td {
+        padding: 0.25rem;
+        height: 50px;
+    }
 }

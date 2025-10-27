@@ -1,5 +1,5 @@
-/* Estilos para la ventana modal */
-.modal-overlay {
+/* Estilos específicos para el modal - NO afectan la página principal */
+#addClassModal.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -15,109 +15,120 @@
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.modal-overlay.visible {
+#addClassModal.modal-overlay.visible {
     opacity: 1;
     visibility: visible;
 }
 
-.modal-content {
+#addClassModal .modal-content {
     background-color: #fff;
     padding: 0;
     border-radius: 8px;
     width: 500px;
     max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
 }
 
-.modal-header {
-    background-color: #4CAF50;
+#addClassModal .modal-header {
+    background-color: #212529;
     color: white;
     padding: 1rem 1.5rem;
 }
 
-.modal-header h2 {
+#addClassModal .modal-header h2 {
     margin: 0;
     font-size: 1.25rem;
 }
 
-.modal-body {
+#addClassModal .modal-body {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.form-group label {
+#addClassModal .form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
+    color: #495057;
 }
 
-.form-group select,
-.form-group input {
+#addClassModal .form-group select,
+#addClassModal .form-group input {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ced4da;
     border-radius: 6px;
     background-color: #f8f9fa;
     font-size: 1rem;
+    box-sizing: border-box;
 }
 
-input[disabled] {
+#addClassModal input[disabled] {
     background-color: #e9ecef;
     cursor: not-allowed;
 }
 
-.horario-adder {
+#addClassModal .horario-adder {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
-.horario-adder select { width: 40%; }
-.horario-adder input { width: 25%; }
+#addClassModal .horario-adder select, 
+#addClassModal .horario-adder input {
+    flex: 1;
+    min-width: 120px;
+}
 
-.add-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    border: none;
-    background-color: #4CAF50;
+#addClassModal .add-btn {
+    background-color: #212529;
     color: white;
-    font-size: 2rem;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
     cursor: pointer;
-    padding-bottom: 4px;
+    font-size: 1rem;
+    white-space: nowrap;
 }
 
-.horarios-list-table {
+#addClassModal .add-btn:hover {
+    opacity: 0.85;
+}
+
+#addClassModal .horarios-list-table {
     width: 100%;
     margin-top: 1rem;
     border-collapse: collapse;
+    border: 1px solid #dee2e6;
 }
 
-.horarios-list-table th, .horarios-list-table td {
+#addClassModal .horarios-list-table th, 
+#addClassModal .horarios-list-table td {
     padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+    border: 1px solid #dee2e6;
 }
 
-.horarios-list-table th {
+#addClassModal .horarios-list-table th {
     background-color: #f8f9fa;
+    font-weight: 600;
 }
 
-.horarios-list-table .delete-horario-btn {
+#addClassModal .horarios-list-table .delete-horario-btn {
     cursor: pointer;
     color: #dc3545;
     background: none;
     border: none;
     font-size: 1.2rem;
+    padding: 0.25rem 0.5rem;
 }
 
-.modal-footer {
+#addClassModal .modal-footer {
     display: flex;
     justify-content: flex-end;
     padding: 1rem 1.5rem;
@@ -126,16 +137,31 @@ input[disabled] {
     gap: 1rem;
 }
 
-/* Estilo para celda del horario principal ocupada */
-.schedule-table .class-scheduled {
-    background-color: #0d6efd;
-    color: white;
-    font-size: 0.8rem;
-    padding: 4px;
-    text-align: left;
-    vertical-align: top;
-    cursor: default;
+#addClassModal .btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
 }
-.schedule-table .class-scheduled:hover {
-    background-color: #0b5ed7;
+
+#addClassModal .btn:hover {
+    opacity: 0.85;
+}
+
+#addClassModal .btn-primary {
+    background-color: #212529;
+    color: #fff;
+}
+
+#addClassModal .btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+/* Asegurar que los estilos del modal no afecten la página principal */
+#addClassModal * {
+    box-sizing: border-box;
 }

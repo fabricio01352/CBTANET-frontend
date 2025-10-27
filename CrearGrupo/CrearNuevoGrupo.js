@@ -1,3 +1,44 @@
+async function cargarDocentes(materiaId) {
+  try {
+    console.log(`Cargando docentes para materia ID: ${materiaId}`);
+    const response = await fetch(`http://localhost:8080/docentes/materia/${materiaId}`);
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("Docentes recibidos:", data);
+    
+    const select = document.getElementById("modal-docente");
+    if (!select) {
+      console.error("No se encontró el select de docentes");
+      return;
+    }
+    
+    // Limpiar y llenar el dropdown
+    select.innerHTML = '<option value="">Selecciona un docente</option>';
+    data.forEach((d) => {
+      const option = document.createElement("option");
+      option.value = d.id; // Asegúrate que esta propiedad es correcta
+      option.textContent = d.nombre;
+      select.appendChild(option);
+    });
+    
+    console.log(`Dropdown de docentes actualizado con ${data.length} opciones`);
+    
+  } catch (error) {
+    console.error("Error al cargar docentes:", error);
+    const select = document.getElementById("modal-docente");
+    if (select) {
+      select.innerHTML = '<option value="">Error al cargar docentes</option>';
+    }
+  }
+}
+
+
+
+
 document.addEventListener("DOMContentLoaded", async function () {
   const scheduleBody = document.querySelector(".schedule-table tbody");
   const startTime = 7;
@@ -26,7 +67,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const actualizarCampos = () => {
     const semestre = parseInt(semestreSelect.value);
-
     if (semestre === 1) {
       carreraSelect.disabled = true;
       areaSelect.disabled = true;
@@ -40,48 +80,185 @@ document.addEventListener("DOMContentLoaded", async function () {
   };
 
   semestreSelect.addEventListener("change", actualizarCampos);
-  actualizarCampos(); // inicialización
+  actualizarCampos();
 
 
 
 
-
-
-
-
-
-
-async function cargarAreasPropedeuticas() {
+  async function cargarAreasPropedeuticas() {
     const select = document.getElementById("area-propedeutica");
     try {
-      const response = await fetch("http://localhost:8080/areas-propedeuticas"); 
+      const response = await fetch("http://localhost:8080/areas-propedeuticas");
       const areas = await response.json();
-
-      select.innerHTML = ""; 
+      select.innerHTML = '<option value="ninguna">Ninguna</option>';
       areas.forEach((area) => {
         const option = document.createElement("option");
-        option.value = area.id; 
+        option.value = area.id;
         option.textContent = area.nombre;
         select.appendChild(option);
       });
+    console.log("Áreas propedéuticas cargadas:", areas.length); // ← Para debug
+
+
     } catch (error) {
       console.error("Error al cargar las áreas propedéuticas:", error);
     }
   }
 
-async function cargarCarreras() {
+  async function cargarCarreras() {
     try {
       const response = await fetch("http://localhost:8080/carreras-tecnicas");
       const data = await response.json();
       const select = document.getElementById("carrera");
-      select.innerHTML = data.map(c => `<option value="${c.id}">${c.nombre}</option>`).join("");
+      select.innerHTML = '<option value="tronco-comun">Tronco Común</option>';
+      data.forEach((c) => {
+        const option = document.createElement("option");
+        option.value = c.id;
+        option.textContent = c.nombre;
+        select.appendChild(option);
+      });
     } catch (error) {
       console.error("Error al cargar carreras:", error);
     }
   }
 
+  async function cargarAulas() {
+    try {
+      const response = await fetch("http://localhost:8080/aulas");
+      const data = await response.json();
+      const select = document.getElementById("modal-aula");
+      select.innerHTML = data
+        .map((c) => `<option value="${c.id}">${c.clave}</option>`)
+        .join("");
+    } catch (error) {
+      console.error("Error al cargar aulas:", error);
+    }
+  }
 
+ async function cargarMateriasFiltradas() {
+  try {
+    const semestre = document.getElementById("semestre").value;
+    const carrera = document.getElementById("carrera").value;
+    const area = document.getElementById("area-propedeutica").value;
 
+    const dropdown = document.getElementById("materialsDropdown");
+    const btn = document.getElementById("addClassBtn");
+
+    if (!dropdown || !btn) {
+      console.error("No se encontraron elementos del dropdown de materias");
+      return;
+    }
+
+    if (!semestre || semestre === "1") {
+      dropdown.innerHTML = '<option value="">Selecciona un semestre válido</option>';
+      btn.disabled = true;
+      return;
+    }
+
+    let url = `http://localhost:8080/materias/grado/${semestre}`;
+    
+    if (carrera && carrera !== "tronco-comun" && semestre >= 2) {
+      url += `/carrera/${carrera}`;
+    }
+    
+    if (area && area !== "ninguna" && semestre === "6") {
+      url += `/area/${area}`;
+    }
+
+    console.log("URL de materias:", url); 
+    
+    const res = await fetch(url);
+    
+    if (!res.ok) {
+      throw new Error(`Error HTTP: ${res.status}`);
+    }
+    
+    const materias = await res.json();
+    console.log("Materias recibidas:", materias); 
+
+    if (materias.length === 0) {
+      dropdown.innerHTML = '<option value="">No hay materias disponibles para estos filtros</option>';
+      btn.disabled = true;
+    } else {
+      dropdown.innerHTML = '<option value="">Selecciona una materia</option>';
+      materias.forEach((m) => {
+        const option = document.createElement("option");
+        option.value = m.id;
+        option.textContent = m.nombre;
+        dropdown.appendChild(option);
+      });
+      btn.disabled = dropdown.value === "";
+    }
+
+    // CORRECCIÓN: Remover event listeners antiguos antes de agregar nuevos
+    const newDropdown = dropdown.cloneNode(true);
+    dropdown.parentNode.replaceChild(newDropdown, dropdown);
+    
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    // Agregar event listeners a los nuevos elementos
+    newDropdown.addEventListener("change", () => {
+      newBtn.disabled = !newDropdown.value;
+    });
+
+    // Event listener del botón "Agregar Clase"
+    newBtn.addEventListener("click", async () => {
+      const materiaId = newDropdown.value;
+      const materiaNombre = newDropdown.options[newDropdown.selectedIndex].text;
+      
+      if (materiaId) {
+        const assignedList = document.getElementById("assigned-materials-list");
+        if (!assignedList) {
+          console.error("No se encontró la lista de materias asignadas");
+          return;
+        }
+        
+        const existingMateria = assignedList.querySelector(`li[data-materia-id="${materiaId}"]`);
+        
+        if (existingMateria) {
+          alert("Esta materia ya está en la lista");
+          return;
+        }
+
+        // Agregar materia a la lista
+        const li = document.createElement("li");
+        li.dataset.materiaId = materiaId;
+        console.log(materiaId, materiaNombre);
+        li.dataset.materiaNombre = materiaNombre;
+        li.innerHTML = `
+          <span class="material-text">${materiaNombre}</span>
+          <div class="material-actions">
+              <span class="material-icons add-btn" title="Agregar horario">add_circle</span>
+          </div>
+        `;
+        assignedList.appendChild(li);
+
+        const modal = document.getElementById("addClassModal");
+        if (modal) {
+          const modalMateriaName = modal.querySelector("#modal-materia-name");
+          modalMateriaName.value = materiaNombre;
+          modal.classList.add("visible");
+          await cargarDocentes(materiaId);
+          
+          newDropdown.selectedIndex = 0;
+          newBtn.disabled = true;
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error("Error al cargar materias filtradas:", err);
+    const dropdown = document.getElementById("materialsDropdown");
+    if (dropdown) {
+      dropdown.innerHTML = '<option value="">Error al cargar materias</option>';
+    }
+    const btn = document.getElementById("addClassBtn");
+    if (btn) {
+      btn.disabled = true;
+    }
+  }
+}
 
 
 
@@ -99,63 +276,69 @@ async function cargarCarreras() {
     const modalHTML = await response.text();
     modalContainer.innerHTML = modalHTML;
 
+    const modal = modalContainer.querySelector("#addClassModal");
+    const materialsList = document.getElementById("assigned-materials-list"); // CORREGIDO: Usar la lista correcta
+
+    // Cargar recursos primero
+    await cargarAreasPropedeuticas();
+    await cargarCarreras();
+    await cargarAulas();
+    await cargarMateriasFiltradas();
+semestreSelect.addEventListener("change", function() {
+    actualizarCampos();
+    cargarMateriasFiltradas();
+  });
+
+  carreraSelect.addEventListener("change", cargarMateriasFiltradas);
+  areaSelect.addEventListener("change", cargarMateriasFiltradas);
+
+
+
+
+    // Inicializar lógica del modal después de cargar todos los recursos
+    if (modal && materialsList) {
+      initializeModalLogic(scheduleBody, modal, materialsList);
+    } else {
+      console.error("No se pudo inicializar el modal: elementos no encontrados");
+    }
+
     const modalStyle = document.createElement("link");
     modalStyle.rel = "stylesheet";
     modalStyle.href = "../AgregarClase/AgregarClase.css";
     document.head.appendChild(modalStyle);
 
-    initializeModalLogic(scheduleBody);
-
-
- await cargarAreasPropedeuticas();
-await cargarCarreras();
-
   } catch (err) {
     console.error("Error cargando la modal:", err);
   }
 
-  // --- Botón Crear Grupo ---
-  const btnCrear = document.querySelector(".btn-primary");
-  btnCrear.addEventListener("click", (e) => {
-    e.preventDefault();
-    validarCreacionGrupo();
-  });
+  const btnCrear = document.getElementById("create-group-btn");
+  if (btnCrear) {
+    btnCrear.addEventListener("click", (e) => {
+      e.preventDefault();
+      validarCreacionGrupo();
+    });
+  }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ------------------------------------------------------------
 // VALIDACIONES DE FLUJOS ALTERNATIVOS
 // ------------------------------------------------------------
-function validarCreacionGrupo() {
-  const cicloActivo = true; // Simulado
+async function validarCreacionGrupo() {
+  const cicloActivo = true;
   const semestre = parseInt(document.getElementById("semestre").value);
   const carrera = document.getElementById("carrera").value;
   const area = document.getElementById("area-propedeutica").value;
-  const materias = document.querySelectorAll(".materials-list li");
+  const nombreGrupo = document.getElementById("group-name").value;
+  const turno = document.getElementById("turno").value;
+  const materias = document.querySelectorAll("#assigned-materials-list li");
   const horarioCeldas = document.querySelectorAll(".class-scheduled");
 
+  // Validaciones básicas
   if (!cicloActivo) {
     alert("❌ No existe un ciclo escolar activo.");
     return;
   }
 
-  const nombreGrupo = document.getElementById("group-name").value;
   const regexValido = /^[A-Za-z0-9\sÁÉÍÓÚÑáéíóúñ-]+$/;
   if (!regexValido.test(nombreGrupo)) {
     alert("⚠️ El nombre del grupo contiene caracteres inválidos.");
@@ -178,67 +361,450 @@ function validarCreacionGrupo() {
   ).length;
 
   if (materiasAsignadas < totalMaterias) {
-    alert(
-      "⚠️ Debe asignar clases para todas las materias antes de crear el grupo."
-    );
+    alert("⚠️ Debe asignar clases para todas las materias antes de crear el grupo.");
     return;
   }
 
-  const horasRequeridas = 4; // Simulado
+  const horasRequeridas = 4;
   const horasAsignadas = horarioCeldas.length / totalMaterias;
   if (horasAsignadas < horasRequeridas) {
     alert("⚠️ Faltan horas semanales por completar en alguna materia.");
     return;
   }
 
-  alert("✅ Grupo creado correctamente.");
+  // ✅ PREPARAR DATOS PARA ENVIAR AL BACKEND
+  try {
+    // Obtener todas las clases asignadas del horario
+    const clases = obtenerClasesDelHorario();
+
+    const clasesValidas = clases.filter(clase => {
+  const esValida = clase.materiaId && !isNaN(clase.materiaId) && clase.horarios.length > 0;
+  if (!esValida) {
+    console.error(`❌ Clase inválida omitida:`, clase);
+  }
+  return esValida;
+});
+
+if (clasesValidas.length === 0) {
+  alert('❌ No hay clases válidas para enviar. Verifica que todas las materias tengan ID correcto.');
+  return;
+}
+
+
+    // Hardcodear algunos valores para pruebas
+   const grupoData = {
+  nota: nombreGrupo, // ← "nota" no "node"
+  letra: nombreGrupo.charAt(0),
+  activo: true, // ← "activo" no "active"
+  semestre: semestre - 1, // ← número, no string
+  turno: turno.toUpperCase(),
+  cicloEscolarId: 1, // ← "cicloEscolarId" no "tcloEscolarId"
+  carreraTecnicaId: carrera !== "tronco-comun" ? parseInt(carrera) : null, // ← "carreraTecnicaId" no "carrenTecnicaId"
+  areaPropedeuticaId: area !== "ninguna" ? parseInt(area) : null, // ← "areaPropedeuticaId" no "areaPropedenticalId"
+  clases: clasesValidas
+};
+
+
+
+    console.log("Enviando datos al backend:", grupoData);
+
+
+console.log("=== DEBUG: Verificando datos ===");
+console.log("Materias asignadas en el DOM:", document.querySelectorAll('#assigned-materials-list li'));
+console.log("IDs de materias encontrados:");
+
+const materiasDebug = document.querySelectorAll('#assigned-materials-list li');
+materiasDebug.forEach(li => {
+  console.log(`- ${li.dataset.materiaNombre}: ID=${li.dataset.materiaId}`);
+});
+
+console.log("Clases preparadas para enviar:", clases);
+console.log("=== FIN DEBUG ===");
+
+
+
+
+
+
+// Y LUEGO MODIFICA el grupoData que ya tienes - cambia "clases: clases" por "clases: clasesValidas"
+grupoData.clases = clasesValidas;
+
+if (!validarDatosClases(clasesValidas)) {  // ← También cambia aquí
+  alert('❌ Error: Hay datos inválidos en las clases. Verifica que todos los docentes y aulas estén correctamente asignados.');
+  return;
+}
+
+
+
+
+
+
+
+
+if (!validarDatosClases(clases)) {
+  alert('❌ Error: Hay datos inválidos en las clases. Verifica que todos los docentes y aulas estén correctamente asignados.');
+  return;
+}
+
+console.log("=== DEBUG DETALLADO ANTES DE ENVIAR ===");
+console.log("Clases a enviar:", clases);
+
+// Debug detallado de cada clase
+clases.forEach((clase, index) => {
+  console.log(`Clase ${index}:`, {
+    materiaId: clase.materiaId,
+    tipomateriaId: typeof clase.materiaId,
+    horarios: clase.horarios.map(h => ({
+      docenteId: h.docenteId,
+      aulaId: h.aulaId,
+      dia: h.dia,
+      horaInicio: h.horaInicio,
+      horaFin: h.horaFin
+    }))
+  });
+});
+console.log("=== FIN DEBUG ===");
+
+
+
+
+
+
+
+
+console.log("=== DEBUG FINAL - JSON A ENVIAR ===");
+console.log("grupoData.clases:", grupoData.clases);
+console.log("JSON.stringify:", JSON.stringify(grupoData));
+
+// Verifica específicamente la estructura de clases
+grupoData.clases.forEach((clase, index) => {
+  console.log(`Clase ${index} propiedades:`, Object.keys(clase));
+});
+console.log("=== FIN DEBUG FINAL ===");
+
+// Luego hace el fetch...
+const response = await fetch('http://localhost:8080/grupos', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(grupoData)
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Enviar POST al backend
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Error HTTP: ${response.status}`);
+    }
+
+    const grupoCreado = await response.json();
+    alert("✅ Grupo creado correctamente.");
+    console.log("Grupo creado:", grupoCreado);
+    
+    // Opcional: Redirigir o limpiar el formulario
+    // window.location.href = '/lista-grupos'; // Redirigir a lista de grupos
+    // limpiarFormulario(); // Limpiar el formulario después de crear
+
+  } catch (error) {
+    console.error('Error al crear el grupo:', error);
+    alert(`❌ Error al crear el grupo: ${error.message}`);
+  }
+}
+
+// ✅ FUNCIÓN PARA OBTENER LAS CLASES DEL HORARIO
+function obtenerClasesDelHorario() {
+  const clases = [];
+  const celdasOcupadas = document.querySelectorAll('.class-scheduled');
+  
+  // Agrupar celdas por materia
+  const materiasMap = new Map();
+  
+  celdasOcupadas.forEach(cell => {
+    const materiaNombre = cell.dataset.materia;
+    if (!materiaNombre) {
+      console.warn('Celda sin materia asignada:', cell);
+      return;
+    }
+    
+    const materiaId = obtenermateriaIdPorNombre(materiaNombre);
+    if (!materiaId) {
+      console.error(`Materia sin ID válido: ${materiaNombre}`);
+      return;
+    }
+    
+    if (!materiasMap.has(materiaNombre)) {
+      materiasMap.set(materiaNombre, {
+        materiaId: materiaId,
+        horarios: []
+      });
+    }
+    
+    const dia = parseInt(cell.dataset.day);
+    const hora = parseInt(cell.dataset.hour);
+    
+    materiasMap.get(materiaNombre).horarios.push({
+      dia: dia,
+      horaInicio: formatearHoraLocalTime(hora),
+      horaFin: formatearHoraLocalTime(hora + 1),
+      aulaId: obtenerAulaIdDeCelda(cell),
+      docenteId: obtenerDocenteIdDeCelda(cell)
+    });
+  });
+  
+  // Convertir el Map a array de clases y validar
+  materiasMap.forEach((claseData, materiaNombre) => {
+    if (claseData.materiaId && claseData.horarios.length > 0) {
+      clases.push({
+        materiaId: claseData.materiaId,
+        horarios: claseData.horarios
+      });
+    } else {
+      console.error(`Clase inválida omitida: ${materiaNombre}`, claseData);
+    }
+  });
+  
+  console.log("Clases validadas:", clases);
+  return clases;
+}
+
+// ✅ NUEVA FUNCIÓN: Formatear hora como string para LocalTime
+function formatearHoraLocalTime(hora) {
+  // Formato: "HH:00:00" para LocalTime
+  return `${hora.toString().padStart(2, '0')}:00:00`;
+}
+
+// ✅ FUNCIÓN AUXILIAR: Obtener ID de materia por nombre
+function obtenermateriaIdPorNombre(materiaNombre) {
+  const materiasAsignadas = document.querySelectorAll('#assigned-materials-list li');
+  
+  console.log(`Buscando ID para materia: "${materiaNombre}"`);
+  console.log("Materias disponibles en DOM:", materiasAsignadas.length);
+  
+  for (const li of materiasAsignadas) {
+    console.log(`- Li: ${li.dataset.materiaNombre} -> ID: ${li.dataset.materiaId}`);
+    
+    if (li.dataset.materiaNombre === materiaNombre) {
+      const materiaId = li.dataset.materiaId;
+      
+      // Validación más estricta
+      if (!materiaId || materiaId === 'undefined' || materiaId === 'null' || materiaId === '') {
+        console.error(`❌ ID de materia NO válido para: "${materiaNombre}"`, materiaId);
+        return null;
+      }
+      
+      const idNumero = parseInt(materiaId);
+      if (isNaN(idNumero)) {
+        console.error(`❌ ID de materia no es número: "${materiaNombre}" -> "${materiaId}"`);
+        return null;
+      }
+      
+      console.log(`✅ ID encontrado: "${materiaNombre}" -> ${idNumero}`);
+      return idNumero;
+    }
+  }
+  
+  console.error(`❌ No se encontró materia en DOM: "${materiaNombre}"`);
+  return null;
+}
+
+
+// ✅ FUNCIÓN AUXILIAR: Obtener ID de aula de la celda
+function obtenerAulaIdDeCelda(cell) {
+  // Buscar el texto del aula en el contenido de la celda
+  const contenido = cell.innerHTML;
+  const aulaMatch = contenido.match(/Aula:\s*(\w+)/);
+  if (aulaMatch) {
+    const aulaNombre = aulaMatch[1];
+    // Buscar el ID del aula en el dropdown del modal
+    const aulaSelect = document.getElementById('modal-aula');
+    if (aulaSelect) {
+      for (const option of aulaSelect.options) {
+        if (option.text === aulaNombre) {
+          return parseInt(option.value);
+        }
+      }
+    }
+  }
+  return 1; // Hardcodeado para pruebas
+}
+
+// ✅ FUNCIÓN AUXILIAR: Obtener ID de docente de la celda
+function obtenerDocenteIdDeCelda(cell) {
+  // Buscar el nombre del docente en el contenido de la celda
+  const contenido = cell.innerHTML;
+  const lineas = contenido.split('<br>');
+  
+  if (lineas.length > 1 && lineas[1].trim() && !lineas[1].includes('undefined')) {
+    const docenteNombre = lineas[1].trim();
+    
+    // Buscar el ID del docente en el dropdown del modal
+    const docenteSelect = document.getElementById('modal-docente');
+    if (docenteSelect) {
+      for (const option of docenteSelect.options) {
+        if (option.text === docenteNombre) {
+          return parseInt(option.value);
+        }
+      }
+    }
+  }
+
+
+  
+  // Si no se encuentra, buscar en el dataset del li
+  const materiaNombre = cell.dataset.materia;
+  const materiaLi = document.querySelector(`li[data-materia-nombre="${materiaNombre}"]`);
+  if (materiaLi && materiaLi.dataset.docente && materiaLi.dataset.docente !== 'undefined') {
+    return parseInt(materiaLi.dataset.docente);
+  }
+  
+  console.warn(`No se pudo obtener docenteId para celda, usando valor por defecto: 1`);
+  return 3; // Hardcodeado para pruebas
+}
+
+
+
+function validarDatosClases(clases) {
+  console.log("=== VALIDANDO DATOS DE CLASES ===");
+  
+  for (const clase of clases) {
+    console.log(`Validando clase con materiaId: ${clase.materiaId}`);
+    
+    for (const horario of clase.horarios) {
+      console.log("Horario a validar:", horario);
+      
+      // Validar docenteId
+      if (!horario.docenteId || horario.docenteId === 'undefined' || isNaN(horario.docenteId)) {
+        console.error('❌ DocenteId inválido:', horario.docenteId);
+        return false;
+      }
+      
+      // Validar aulaId
+      if (!horario.aulaId || horario.aulaId === 'undefined' || isNaN(horario.aulaId)) {
+        console.error('❌ AulaId inválido:', horario.aulaId);
+        return false;
+      }
+      
+      // Validar horas
+      if (!horario.horaInicio || !horario.horaFin) {
+        console.error('❌ Horas inválidas:', horario.horaInicio, horario.horaFin);
+        return false;
+      }
+      
+      console.log(`✅ Horario válido - Docente: ${horario.docenteId}, Aula: ${horario.aulaId}`);
+    }
+  }
+  
+  console.log("=== TODAS LAS CLASES SON VÁLIDAS ===");
+  return true;
+}
+
+
+
+
+
+// ✅ FUNCIÓN OPCIONAL: Limpiar formulario después de crear grupo
+function limpiarFormulario() {
+  document.getElementById('group-name').value = '';
+  document.getElementById('semestre').selectedIndex = 0;
+  document.getElementById('carrera').selectedIndex = 0;
+  document.getElementById('area-propedeutica').selectedIndex = 0;
+  document.getElementById('assigned-materials-list').innerHTML = '';
+  
+  // Limpiar horario
+  const celdasOcupadas = document.querySelectorAll('.class-scheduled');
+  celdasOcupadas.forEach(cell => {
+    cell.classList.remove('class-scheduled');
+    cell.removeAttribute('data-materia');
+    cell.innerHTML = '';
+  });
 }
 
 // ------------------------------------------------------------
-// Lógica del modal (actualizada para editar/eliminar materias)
+// Lógica del modal - COMPLETAMENTE CORREGIDA
 // ------------------------------------------------------------
-function initializeModalLogic(scheduleBody) {
-  const materialsList = document.querySelector(".materials-list");
-  const modal = document.getElementById("addClassModal");
-  const modalMateriaName = document.getElementById("modal-materia-name");
-  const addHorarioBtn = document.getElementById("add-horario-btn");
-  const horariosListBody = document.getElementById("horarios-list-body");
-  const confirmBtn = document.getElementById("confirm-btn");
-  const cancelBtn = document.getElementById("cancel-btn");
-  const modalDocente = document.getElementById("modal-docente");
-  const modalAula = document.getElementById("group-name");
+function initializeModalLogic(scheduleBody, modal, materialsList) {
+  console.log("Inicializando modal logic...", { materialsList, modal });
 
-  let materiaActualLi = null; // <li> seleccionado (para editar)
+  if (!materialsList || !modal) {
+    console.error(
+      "initializeModalLogic: materialsList o modal no encontrados.",
+      { materialsList, modal }
+    );
+    return;
+  }
 
-  if (!materialsList || !modal) return;
+  const modalMateriaName = modal.querySelector("#modal-materia-name");
+  const addHorarioBtn = modal.querySelector("#add-horario-btn");
+  const horariosListBody = modal.querySelector("#horarios-list-body");
+  const confirmBtn = modal.querySelector("#confirm-btn");
+  const cancelBtn = modal.querySelector("#cancel-btn");
+  const modalDocente = modal.querySelector("#modal-docente");
+  const modalAula = modal.querySelector("#modal-aula");
 
-  // ----- Helper: crea una fila en horariosListBody desde un objeto horario -----
+  let materiaActualLi = null;
+
   const crearFilaHorarioDesdeObj = (h) => {
     const row = document.createElement("tr");
     row.innerHTML = `
-            <td data-day-value="${h.day}">${h.dayText}</td>
-            <td>${h.start}:00</td>
-            <td>${h.end}:00</td>
-            <td><button class="delete-horario-btn">🗑️</button></td>
-        `;
+      <td data-day-value="${h.day}">${h.dayText}</td>
+      <td>${h.start}:00</td>
+      <td>${h.end}:00</td>
+      <td><button type="button" class="delete-horario-btn">🗑️</button></td>
+    `;
     return row;
   };
 
-  // ----- Abre modal para nueva asignación o para editar existente -----
   const abrirModalParaLi = (li) => {
     materiaActualLi = li;
-    // Limpiar modal
     horariosListBody.innerHTML = "";
-    // Cargar valores si existen en data-attributes
-    const nombre =
-      li.dataset.materiaNombre ||
-      li.querySelector(".material-text")?.textContent?.trim() ||
-      "";
-    modalMateriaName.value = nombre;
+    modalMateriaName.value = li.dataset.materiaNombre || "";
     modalDocente.value = li.dataset.docente || "";
     modalAula.value = li.dataset.aula || "";
 
-    // Si hay horarios guardados, parsearlos y rellenar la tabla de horarios
+    console.log("=== DEBUG DOCENTES ===");
+  console.log("Modal docente select:", modalDocente);
+  console.log("Opciones disponibles:", modalDocente.options.length);
+  console.log("Valor seleccionado:", modalDocente.value);
+  console.log("Valor del dataset:", li.dataset.docente);
+
+const materiaId = li.dataset.materiaId;
+  if (materiaId) {
+    cargarDocentes(materiaId).then(() => {
+      // ✅ DEBUG después de cargar docentes
+      console.log("Después de cargar docentes - Opciones:", modalDocente.options.length);
+      console.log("Después de cargar docentes - Valor:", modalDocente.value);
+      
+      // Si hay un docente guardado, seleccionarlo
+      if (li.dataset.docente && li.dataset.docente !== "undefined") {
+        modalDocente.value = li.dataset.docente;
+        console.log("Docente seleccionado del dataset:", modalDocente.value);
+      }
+    });
+  }
+
+
+
+
+
     if (li.dataset.horarios) {
       try {
         const horarios = JSON.parse(li.dataset.horarios);
@@ -252,286 +818,216 @@ function initializeModalLogic(scheduleBody) {
     modal.classList.add("visible");
   };
 
-  // ----- Escuchar clicks en la lista (delegación): detectar editar/eliminar o abrir modal nuevo -----
+  // CORRECCIÓN: Delegación de eventos para la lista de materias
   materialsList.addEventListener("click", (event) => {
     const target = event.target;
     const li = target.closest("li");
     if (!li) return;
 
-    // Si clic en editar
-    if (target.classList.contains("edit-btn")) {
+    // Verificar si es botón de agregar
+    if (target.classList.contains("add-btn") || target.closest(".add-btn")) {
       abrirModalParaLi(li);
       return;
     }
 
-    // Si clic en eliminar
-    if (target.classList.contains("delete-btn")) {
-      if (!confirm("¿Eliminar esta clase del horario?")) return;
+    // Verificar si es botón de editar
+    if (target.classList.contains("edit-btn") || target.closest(".edit-btn")) {
+      abrirModalParaLi(li);
+      return;
+    }
 
-      // Borrar celdas programadas que tengan data-materia igual al nombre guardado
-      const materiaNombre =
-        li.dataset.materiaNombre ||
-        li.querySelector(".material-text")?.textContent?.trim();
+    // Verificar si es botón de eliminar
+    if (target.classList.contains("delete-btn") || target.closest(".delete-btn")) {
+      if (!confirm("¿Eliminar esta clase del horario?")) return;
+      
+      const materiaNombre = li.dataset.materiaNombre;
       if (materiaNombre) {
-        const celdas = scheduleBody.querySelectorAll(
-          `td[data-materia="${materiaNombre}"]`
-        );
+        // Limpiar celdas del horario
+        const celdas = scheduleBody.querySelectorAll(`td[data-materia="${materiaNombre}"]`);
         celdas.forEach((c) => {
           c.classList.remove("class-scheduled");
           c.removeAttribute("data-materia");
           c.innerHTML = "";
         });
       }
-
-      // Restaurar el li a estado no asignado
-      li.classList.remove("materia-asignada");
-      li.removeAttribute("data-materia-nombre");
-      li.removeAttribute("data-docente");
-      li.removeAttribute("data-aula");
-      li.removeAttribute("data-horarios");
-
-      // Reconstruir contenido interior (icono + texto)
-      const materiaTexto = materiaNombre || li.textContent.trim();
-      li.innerHTML = `<span class="material-text">${materiaTexto}</span>
-                            <div class="material-actions">
-                                <span class="material-icons add-btn" title="Agregar">add_circle</span>
-                            </div>`;
+      
+      // Eliminar la materia de la lista
+      li.remove();
       return;
-    }
-
-    // Si clic en el <li> (no en iconos) — abrir modal para nueva asignación / editar si ya tiene
-    // Si la materia ya está asignada, preferimos abrir el modal de edición
-    if (li.classList.contains("materia-asignada")) {
-      abrirModalParaLi(li);
-    } else {
-      // Li no asignada aún: abrir modal y preparar para crear
-      // Dejar en materiaActualLi el li para que al confirmar se guarde en este li
-      materiaActualLi = li;
-      horariosListBody.innerHTML = "";
-      modalMateriaName.value =
-        li.dataset.materiaNombre ||
-        li.querySelector(".material-text")?.textContent?.trim() ||
-        "";
-      modalDocente.value = "";
-      modalAula.value = "";
-      modal.classList.add("visible");
     }
   });
 
-  // ----- Cerrar modal -----
   const closeModal = () => {
     modal.classList.remove("visible");
+    materiaActualLi = null;
   };
-  cancelBtn.addEventListener("click", closeModal);
+
+  // Manejo del cierre del modal
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", closeModal);
+  }
+
+  // Cerrar modal al hacer clic fuera
   modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  // ----- Añadir horario dentro del modal -----
-  addHorarioBtn.addEventListener("click", () => {
-    const diaSelect = document.getElementById("horario-dia");
-    const inicio = document.getElementById("horario-inicio");
-    const fin = document.getElementById("horario-fin");
-
-    if (!inicio.value || !fin.value) {
-      alert("Selecciona inicio y fin de horario");
-      return;
-    }
-
-    if (parseInt(inicio.value) >= parseInt(fin.value)) {
-      alert("Rango de horas inválido");
-      return;
-    }
-
-    const row = document.createElement("tr");
-    const dayText = diaSelect.options[diaSelect.selectedIndex].text;
-    row.innerHTML = `
-            <td data-day-value="${diaSelect.value}">${dayText}</td>
-            <td>${inicio.value}:00</td>
-            <td>${fin.value}:00</td>
-            <td><button class="delete-horario-btn">🗑️</button></td>
-        `;
-    horariosListBody.appendChild(row);
-  });
-
-  // Eliminar fila de horario dentro del modal
-  horariosListBody.addEventListener("click", (e) => {
-    if (e.target.classList.contains("delete-horario-btn")) {
-      e.target.closest("tr").remove();
+    if (e.target === modal) {
+      closeModal();
     }
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // ----- Confirmar clase: validar y guardar en li y horario principal -----
-  confirmBtn.addEventListener("click", async () => {
-    console.log("Botón confirmar clicado");
-    if (!materiaActualLi) {
-      alert("Error interno: materia no seleccionada.");
-      return;
+  // Cerrar modal con Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("visible")) {
+      closeModal();
     }
+  });
 
-    const materia = modalMateriaName.value.trim();
-    const docente = modalDocente.value.trim();
-    const aula = modalAula.value.trim();
-    const horariosRows = horariosListBody.querySelectorAll("tr");
+  // Agregar horario
+  if (addHorarioBtn) {
+    addHorarioBtn.addEventListener("click", () => {
+      const diaSelect = modal.querySelector("#horario-dia");
+      const inicio = modal.querySelector("#horario-inicio");
+      const fin = modal.querySelector("#horario-fin");
+
+      if (!inicio.value || !fin.value) {
+        alert("Selecciona inicio y fin de horario");
+        return;
+      }
+
+      const inicioHora = parseInt(inicio.value.split(':')[0]);
+      const finHora = parseInt(fin.value.split(':')[0]);
+
+      if (inicioHora >= finHora) {
+        alert("Rango de horas inválido");
+        return;
+      }
+
+      const row = document.createElement("tr");
+      const dayText = diaSelect.options[diaSelect.selectedIndex].text;
+      row.innerHTML = `
+        <td data-day-value="${diaSelect.value}">${dayText}</td>
+        <td>${inicioHora}:00</td>
+        <td>${finHora}:00</td>
+        <td><button type="button" class="delete-horario-btn">🗑️</button></td>
+      `;
+      horariosListBody.appendChild(row);
+    });
+  }
+
+  // Eliminar horario
+  if (horariosListBody) {
+    horariosListBody.addEventListener("click", (e) => {
+      if (e.target.classList.contains("delete-horario-btn")) {
+        e.target.closest("tr").remove();
+      }
+    });
+  }
+
+  // Confirmar horarios
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", () => {
+      if (!materiaActualLi) {
+        alert("Error interno: materia no seleccionada.");
+        return;
+      }
+
+      const materia = modalMateriaName.value.trim();
+      const docente = modalDocente.value.trim();
+      const aula = modalAula.value.trim();
+  console.log("Validando docente - valor:", docente, "tipo:", typeof docente);
 
 
-
-
-
-
-
-
-    // -------------------------------------------------------------
-
-    // const aulaTest = { aula };
-
-    // try {
-    //   const response = await fetch("http://localhost:8080/aulas", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //       body: JSON.stringify({ clave: aula }),
-    //   });
-
-    //    const data = await response.json();
-    //   if (!response.ok) {
-    //     console.error("erorr al guardar el aula", data);
-    //     alert("No se pudo guardar aula.");
-    //     return;
-    //   }
-    // } catch (error) {
-    //   console.error("Error all guardar aula:", error);
-    //   alert("No se pudo guardar aula.");
-    // }
-    // -------------------------------------------------------------
-
-
-
-
-
-
-
+if (!docente || docente === "" || docente === "undefined") {
+    alert("Debe seleccionar un docente válido");
     
-    if (horariosRows.length === 0) {
-      alert("Agrega al menos un horario");
-      return;
-    }
+        console.log("Dropdown de docentes:", {
+      value: modalDocente.value,
+      selectedIndex: modalDocente.selectedIndex,
+      options: Array.from(modalDocente.options).map(opt => ({value: opt.value, text: opt.text}))
+    });
+    return;
+  }
 
-    // Validar conflictos en scheduleBody
-    let conflicto = false;
-    const horariosObjs = []; // recolectar horarios para guardar
-    horariosRows.forEach((row) => {
-      const day = row.cells[0].dataset.dayValue;
-      const dayText = row.cells[0].textContent.trim();
-      const start = parseInt(row.cells[1].textContent.split(":")[0]);
-      const end = parseInt(row.cells[2].textContent.split(":")[0]);
+  
 
-      horariosObjs.push({ day, dayText, start, end });
+  if (!aula || aula === "" || aula === "undefined") {
+    alert("Debe seleccionar un aula válida");
+    return;
+  }
+      
+      const horariosRows = horariosListBody.querySelectorAll("tr");
 
-      for (let h = start; h < end; h++) {
-        const cell = scheduleBody.querySelector(
-          `td[data-day="${day}"][data-hour="${h}"]`
-        );
-        if (cell && cell.classList.contains("class-scheduled")) {
-          // comprobación básica: si la célula ya tiene la misma materia, ignorar (editar)
-          const existingMateria = cell.dataset.materia;
-          if (existingMateria && existingMateria !== materia) {
-            alert(
-              `Conflicto: el aula/docente ya está ocupado el ${dayText} a las ${h}:00.`
-            );
-            conflicto = true;
-            break;
+      if (horariosRows.length === 0) {
+        alert("Agrega al menos un horario");
+        return;
+      }
+
+      let conflicto = false;
+      const horariosObjs = [];
+      
+      // Verificar conflictos
+      horariosRows.forEach((row) => {
+        const day = row.cells[0].dataset.dayValue;
+        const dayText = row.cells[0].textContent.trim();
+        const start = parseInt(row.cells[1].textContent.split(":")[0]);
+        const end = parseInt(row.cells[2].textContent.split(":")[0]);
+
+        horariosObjs.push({ day, dayText, start, end });
+
+        for (let h = start; h < end; h++) {
+          const cell = scheduleBody.querySelector(`td[data-day="${day}"][data-hour="${h}"]`);
+          if (cell && cell.classList.contains("class-scheduled")) {
+            const existingMateria = cell.dataset.materia;
+            if (existingMateria && existingMateria !== materia) {
+              alert(`Conflicto: el aula/docente ya está ocupado el ${dayText} a las ${h}:00.`);
+              conflicto = true;
+              break;
+            }
           }
         }
-      }
-      if (conflicto) return;
-    });
-
-    if (conflicto) return;
-
-    // --- Primero, si la materia ya tenía horarios previos, eliminar sus marcas previas en el horario ---
-    const materiaAnterior = materiaActualLi.dataset.materiaNombre;
-    if (materiaAnterior) {
-      const prevCells = scheduleBody.querySelectorAll(
-        `td[data-materia="${materiaAnterior}"]`
-      );
-      prevCells.forEach((c) => {
-        c.classList.remove("class-scheduled");
-        c.removeAttribute("data-materia");
-        c.innerHTML = "";
+        if (conflicto) return;
       });
-    }
 
-    // Insertar las nuevas clases en el horario principal (marcar data-materia)
-    horariosObjs.forEach((h) => {
-      for (let hh = h.start; hh < h.end; hh++) {
-        const cell = scheduleBody.querySelector(
-          `td[data-day="${h.day}"][data-hour="${hh}"]`
-        );
-        if (cell) {
-          cell.classList.add("class-scheduled");
-          cell.dataset.materia = materia;
-          // contenido visual (puedes mejorar el formato)
-          cell.innerHTML = `<strong>${materia}</strong><br>${
-            docente || ""
-          }<br>Aula: ${aula || ""}`;
-        }
+      if (conflicto) return;
+
+      // Limpiar asignaciones anteriores de esta materia
+      const materiaAnterior = materiaActualLi.dataset.materiaNombre;
+      if (materiaAnterior) {
+        const prevCells = scheduleBody.querySelectorAll(`td[data-materia="${materiaAnterior}"]`);
+        prevCells.forEach((c) => {
+          c.classList.remove("class-scheduled");
+          c.removeAttribute("data-materia");
+          c.innerHTML = "";
+        });
       }
+
+      // Aplicar nuevos horarios
+      horariosObjs.forEach((h) => {
+        for (let hh = h.start; hh < h.end; hh++) {
+          const cell = scheduleBody.querySelector(`td[data-day="${h.day}"][data-hour="${hh}"]`);
+          if (cell) {
+            cell.classList.add("class-scheduled");
+            cell.dataset.materia = materia;
+            cell.innerHTML = `<strong>${materia}</strong><br>${docente || ""}<br>Aula: ${aula || ""}`;
+          }
+        }
+      });
+
+      // Actualizar la materia en la lista
+      materiaActualLi.dataset.materiaNombre = materia;
+      materiaActualLi.dataset.docente = docente;
+      materiaActualLi.dataset.aula = aula;
+      materiaActualLi.dataset.horarios = JSON.stringify(horariosObjs);
+
+      materiaActualLi.classList.add("materia-asignada");
+      materiaActualLi.innerHTML = `
+        <span class="material-text">${materia}</span>
+        <div class="material-actions">
+            <span class="material-icons edit-btn" title="Editar">edit</span>
+            <span class="material-icons delete-btn" title="Eliminar">delete</span>
+        </div>
+      `;
+
+      closeModal();
     });
-
-    // Guardar datos en atributos del <li> para poder editarlos/consultarlos
-    materiaActualLi.dataset.materiaNombre = materia;
-    materiaActualLi.dataset.docente = docente;
-    materiaActualLi.dataset.aula = aula;
-    materiaActualLi.dataset.horarios = JSON.stringify(horariosObjs);
-
-    // Establecer estado visual del li: nombre + acciones a la derecha
-    materiaActualLi.classList.add("materia-asignada");
-    materiaActualLi.innerHTML = `
-            <span class="material-text">${materia}</span>
-            <div class="material-actions">
-                <span class="material-icons edit-btn" title="Editar">edit</span>
-                <span class="material-icons delete-btn" title="Eliminar">delete</span>
-            </div>
-        `;
-
-    closeModal();
-  });
+  }
 }
