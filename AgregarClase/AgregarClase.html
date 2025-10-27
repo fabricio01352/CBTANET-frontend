@@ -20,8 +20,30 @@
                         <option value="5">Sábado</option>
                         <option value="6">Domingo</option>
                     </select>
-                    <input type="time" id="horario-inicio" value="07:00">
-                    <input type="time" id="horario-fin" value="08:00">
+                    <select id="horario-inicio">
+                        <option value="">Selecciona hora inicio</option>
+                        <option value="7:00">7:00</option>
+                        <option value="8:00">8:00</option>
+                        <option value="9:00">9:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="13:00">13:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                    </select>
+                    <select id="horario-fin">
+                        <option value="">Selecciona hora fin</option>
+                        <option value="8:00">8:00</option>
+                        <option value="9:00">9:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="13:00">13:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                    </select>
                     <button id="add-horario-btn" class="add-btn">+</button>
                 </div>
                 <table class="horarios-list-table">
@@ -36,28 +58,17 @@
                     <tbody id="horarios-list-body"></tbody>
                 </table>
             </div>
-                <div class="form-group">
+            <div class="form-group">
                 <label for="modal-docente">Nombre del docente</label>
                 <select id="modal-docente"></select>
-                </div>
-
-
-                
+            </div>
             <div class="form-group">
                 <label for="modal-aula">Aula</label>
                 <select id="modal-aula">
-
-
-
-
                     <option>204av</option>
                     <option>101</option>
                     <option>Laboratorio A</option>
                 </select>
-
-
-
-
             </div>
         </div>
         <div class="modal-footer">

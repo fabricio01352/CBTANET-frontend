@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1750px;
     margin: 0 auto;
     background-color: #ffffff;
     padding: 2.5rem;
@@ -23,7 +23,7 @@ body {
 header h1 {
     margin: 0;
     font-size: 2rem;
-    color: #1c1c1e;
+    color: #131313;
     margin-bottom: 0.5rem;
 }
 
@@ -49,7 +49,7 @@ header .subtitle {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: #495057;
+    color: #000000;
 }
 
 .form-field input,
@@ -66,7 +66,7 @@ header .subtitle {
 .form-field input:focus,
 .form-field select:focus {
     outline: none;
-    border-color: #212529;
+    border-color: #2d6a4f;
     background-color: #fff;
 }
 
@@ -89,7 +89,7 @@ hr {
 
 .materials-section h2 {
     margin-bottom: 1rem;
-    color: #1c1c1e;
+    color: #1e5631;
     font-size: 1.25rem;
     font-weight: 600;
 }
@@ -173,7 +173,6 @@ hr {
     color: #f44336;
 }
 
-/* Materias asignadas */
 #assigned-materials-list li.materia-asignada {
     background-color: #e8f5e8;
     border-color: #4CAF50;
@@ -184,7 +183,6 @@ hr {
     font-weight: 500;
 }
 
-/* Tabla del horario */
 .schedule-section {
     margin-top: 1rem;
 }
@@ -206,16 +204,16 @@ hr {
 }
 
 .schedule-table thead th {
-    background-color: #f8f9fa;
+    background-color: #2d6a4f;
     font-weight: 600;
-    color: #495057;
+    color: white;
 }
 
 .schedule-table tbody th {
     font-weight: 600;
-    background-color: #f8f9fa;
+    background-color: #40916c;
     width: 80px;
-    color: #495057;
+    color: white;
 }
 
 .schedule-table tbody td {
@@ -229,7 +227,7 @@ hr {
 }
 
 .schedule-table .class-scheduled {
-    background-color: #0d6efd;
+    background-color: #40916c;
     color: white;
     font-size: 0.7rem;
     padding: 4px;
@@ -251,10 +249,9 @@ hr {
 }
 
 .schedule-table .class-scheduled:hover {
-    background-color: #0b5ed7;
+    background-color: #2d6a4f;
 }
 
-/* Botones */
 .form-actions {
     display: flex;
     justify-content: flex-end;
@@ -286,7 +283,7 @@ hr {
 }
 
 .btn-primary {
-    background-color: #212529;
+    background-color: #2d6a4f;
     color: #fff;
 }
 
@@ -301,7 +298,129 @@ hr {
     transform: none;
 }
 
-/* Responsive */
+.materias-container {
+    margin-bottom: 20px;
+}
+
+.materias-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.materia-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.materia-item:hover {
+    background: #e9ecef;
+    border-color: #2d6a4f;
+}
+
+.materia-item:active {
+    background: #2d6a4f;
+    color: white;
+}
+
+.main-container {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.materias-column {
+    flex: 0 0 350px; 
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.horario-column {
+    flex: 1; 
+    min-width: 0;
+}
+
+.materias-container {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-height: 400px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.materias-container h3 {
+    margin: 0 0 15px 0;
+    color: #1e5631;
+    font-size: 16px;
+}
+
+.materias-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.materia-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.materia-item:hover {
+    background: #e9ecef;
+    border-color: #2d6a4f;
+    transform: translateY(-1px);
+}
+
+.materia-item:active {
+    background: #2d6a4f;
+    color: white;
+}
+
+.assigned-materias {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.assigned-materias h3 {
+    margin: 0 0 15px 0;
+    color: #1e5631;
+    font-size: 16px;
+}
+
+.schedule-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.schedule-table {
+    width: 100%;
+    min-width: 600px; 
+}
+
 @media (max-width: 768px) {
     body {
         padding: 1rem;
@@ -333,136 +452,7 @@ hr {
         padding: 0.25rem;
         height: 50px;
     }
-}
-
-
-
-
-
-.materias-container {
-    margin-bottom: 20px;
-}
-
-.materias-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.materia-item {
-    padding: 12px;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.materia-item:hover {
-    background: #e9ecef;
-    border-color: #007bff;
-}
-
-.materia-item:active {
-    background: #007bff;
-    color: white;
-}
-
-.main-container {
-    display: flex;
-    gap: 20px;
-    margin: 20px 0;
-}
-
-.materias-column {
-    flex: 0 0 300px; 
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.horario-column {
-    flex: 1; 
-    min-width: 0;
-}
-
-.materias-container {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    max-height: 400px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.materias-container h3 {
-    margin: 0 0 15px 0;
-    color: #333;
-    font-size: 16px;
-}
-
-.materias-list {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.materia-item {
-    padding: 12px;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 14px;
-}
-
-.materia-item:hover {
-    background: #e9ecef;
-    border-color: #007bff;
-    transform: translateY(-1px);
-}
-
-.materia-item:active {
-    background: #007bff;
-    color: white;
-}
-
-.assigned-materias {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.assigned-materias h3 {
-    margin: 0 0 15px 0;
-    color: #333;
-    font-size: 16px;
-}
-
-.schedule-container {
-    overflow-x: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.schedule-table {
-    width: 100%;
-    min-width: 600px; 
-}
-
-@media (max-width: 768px) {
+    
     .main-container {
         flex-direction: column;
     }
